@@ -46,6 +46,8 @@ export class ViiteApiTestsStack extends Stack {
           build: {
             commands: [// deployattava tili annetaan projektille env-parametreissa
               'npm run test',
+              `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption --profile viite-dev | jq .Parameter.Value\``,
+              'env',
               `aws s3 cp result.json s3://${bucket.bucketName}/\`date --iso-8601=seconds\`/result.json `
           ],
           },
