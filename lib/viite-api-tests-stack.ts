@@ -55,13 +55,16 @@ export class ViiteApiTestsStack extends Stack {
           },
           build: {
             commands: [
+              `export TARGET=\`date --iso-8601=seconds\``,
               `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `export QAKEY=\`aws ssm get-parameter --name '/qa/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `export PRODKEY=\`aws ssm get-parameter --name '/prod/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
-              `BASE='https://devapi.testivaylapilvi.fi/viite' APIKEY=$DEVKEY npx bru run --env dev --output results-dev.json`,
-              `BASE='https://api.testivaylapilvi.fi/viite' APIKEY=$QAKEY npx bru run --env dev --output results-qa.json`,
-              `BASE='https://api.vaylapilvi.fi/viite' APIKEY=$PRODKEY npx bru run --env dev --output results-prod.json`,
-              `aws s3 cp result-*.json s3://${bucket.bucketName}/\`date --iso-8601=seconds\`/`
+              `BASE='https://devapi.testivaylapilvi.fi/viite' APIKEY=$DEVKEY npx bru run --env dev --output results-dev.json || true`,
+              `BASE='https://api.testivaylapilvi.fi/viite' APIKEY=$QAKEY npx bru run --env dev --output results-qa.json || true`,
+              `BASE='https://api.vaylapilvi.fi/viite' APIKEY=$PRODKEY npx bru run --env dev --output results-prod.json || true`,
+              `aws s3 cp results-dev.json s3://${bucket.bucketName}/$TARGET/`,
+              `aws s3 cp results-qa.json s3://${bucket.bucketName}/$TARGET/`,
+              `aws s3 cp results-prod.json s3://${bucket.bucketName}/$TARGET/`
           ],
           },
         },
