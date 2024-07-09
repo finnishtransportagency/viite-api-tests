@@ -58,9 +58,9 @@ export class ViiteApiTestsStack extends Stack {
               `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `export QAKEY=\`aws ssm get-parameter --name '/qa/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `export PRODKEY=\`aws ssm get-parameter --name '/prod/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
-              `BASE='https://devapi.testivaylapilvi.fi/viite' APIKEY=$DEVKEY bru run --env dev --output results-dev.json`,
-              `BASE='https://api.testivaylapilvi.fi/viite' APIKEY=$QAKEY bru run --env dev --output results-qa.json`,
-              `BASE='https://api.vaylapilvi.fi/viite' APIKEY=$PRODKEY bru run --env dev --output results-prod.json`,
+              `BASE='https://devapi.testivaylapilvi.fi/viite' APIKEY=$DEVKEY npx bru run --env dev --output results-dev.json`,
+              `BASE='https://api.testivaylapilvi.fi/viite' APIKEY=$QAKEY npx bru run --env dev --output results-qa.json`,
+              `BASE='https://api.vaylapilvi.fi/viite' APIKEY=$PRODKEY npx bru run --env dev --output results-prod.json`,
               `aws s3 cp result-*.json s3://${bucket.bucketName}/\`date --iso-8601=seconds\`/`
           ],
           },
