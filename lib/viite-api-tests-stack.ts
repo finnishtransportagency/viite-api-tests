@@ -25,6 +25,16 @@ export class ViiteApiTestsStack extends Stack {
       bucketName: 'finnishtransportagency-viite-api-tests'
     })
 
+    const devkey = StringParameter.fromSecureStringParameterAttributes(this, 'devapikey', {
+      parameterName: '/dev/viite/apiGateway',
+    })
+    const qakey = StringParameter.fromSecureStringParameterAttributes(this, 'qaapikey', {
+      parameterName: '/qa/viite/apiGateway',
+    })
+    const prodkey = StringParameter.fromSecureStringParameterAttributes(this, 'prodapikey', {
+      parameterName: '/prod/viite/apiGateway',
+    })
+
 
     // create build project
     const runTests = new Project(this,'buildProject',{
@@ -44,16 +54,22 @@ export class ViiteApiTestsStack extends Stack {
           ]
           },
           build: {
-            commands: [// deployattava tili annetaan projektille env-parametreissa
-              'npm run test',
-              `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption --profile viite-dev | jq .Parameter.Value\``,
-              'env',
-              `aws s3 cp result.json s3://${bucket.bucketName}/\`date --iso-8601=seconds\`/result.json `
+            commands: [
+              `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
+              `export QAKEY=\`aws ssm get-parameter --name '/qa/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
+              `export PRODKEY=\`aws ssm get-parameter --name '/prod/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
+              `BASE='https://devapi.testivaylapilvi.fi/viite' APIKEY=$DEVKEY bru run --env dev --output results-dev.json`,
+              `BASE='https://api.testivaylapilvi.fi/viite' APIKEY=$QAKEY bru run --env dev --output results-qa.json`,
+              `BASE='https://api.vaylapilvi.fi/viite' APIKEY=$PRODKEY bru run --env dev --output results-prod.json`,
+              `aws s3 cp result-*.json s3://${bucket.bucketName}/\`date --iso-8601=seconds\`/`
           ],
           },
         },
       })
-    }); 
+    });
+    devkey.grantRead(runTests.role!)
+    qakey.grantRead(runTests.role!)
+    prodkey.grantRead(runTests.role!)
     runTests.role?.addManagedPolicy(ManagedPolicy.fromManagedPolicyArn(this,'cfPolicy','arn:aws:iam::aws:policy/AdministratorAccess'))
     bucket.grantReadWrite(runTests.role!)
 
