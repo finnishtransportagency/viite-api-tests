@@ -1,10 +1,12 @@
-import { CfnDynamicReference, CfnDynamicReferenceService, RemovalPolicy, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnDynamicReference, CfnDynamicReferenceService, Duration, RemovalPolicy, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { BuildSpec, ComputeType, LinuxBuildImage, Project } from 'aws-cdk-lib/aws-codebuild';
 import { Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
-import { CodeBuildAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
+import { CodeBuildAction, GitHubSourceAction, LambdaInvokeAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { CodePipeline } from 'aws-cdk-lib/aws-events-targets';
 import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BlockPublicAccess, Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
@@ -35,6 +37,21 @@ export class ViiteApiTestsStack extends Stack {
       parameterName: '/prod/viite/apiGateway',
     })
 
+    // ETL Lambda
+    const etlLambda = new NodejsFunction(this, 'etllambda', {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(30),
+      //code: Code.fromAsset('src'), // The output from `tsc`
+      entry: './src/lambda/etl.ts',
+      handler: 'handler',
+      bundling: {
+        minify: true,
+      },
+      environment: {
+        BUCKET: bucket.bucketName
+      }
+    })
+    bucket.grantReadWrite(etlLambda)
 
     // create build project
     const runTests = new Project(this,'buildProject',{
@@ -51,7 +68,7 @@ export class ViiteApiTestsStack extends Stack {
               'node --version',
               'npm --version',
               'npm install',
-          ]
+            ]
           },
           build: {
             commands: [
@@ -65,7 +82,7 @@ export class ViiteApiTestsStack extends Stack {
               `aws s3 cp results-dev.json s3://${bucket.bucketName}/$TARGET/`,
               `aws s3 cp results-qa.json s3://${bucket.bucketName}/$TARGET/`,
               `aws s3 cp results-prod.json s3://${bucket.bucketName}/$TARGET/`
-          ],
+            ],
           },
         },
       })
@@ -115,7 +132,16 @@ export class ViiteApiTestsStack extends Stack {
           },
         })
       ]
-    });
+    })
+    pipeline.addStage({
+      stageName: 'ETLProcess',
+      actions: [
+        new LambdaInvokeAction({
+          actionName: 'RunETL',
+          lambda: etlLambda,
+        })
+      ]
+    })
   
 
     const eventRule = new Rule(this, 'nightlyTestRun', {
