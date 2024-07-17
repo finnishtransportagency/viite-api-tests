@@ -62,7 +62,7 @@ const SCHEMA = {
                             "jatkuvuuskoodi": {
                                 "type": "integer",
                                 "minimum": 0, 
-                                "maximum": 5
+                                "maximum": 6
                             }, 
                             "etaisyys": {
                                 "type": "integer",
