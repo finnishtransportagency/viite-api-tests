@@ -10,7 +10,7 @@ import { ApplicationLoadBalancer, ApplicationTargetGroup, ListenerAction, Target
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { CodePipeline } from 'aws-cdk-lib/aws-events-targets';
-import { ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { CanonicalUserPrincipal, ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { FunctionUrlAuthType, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BlockPublicAccess, Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
@@ -35,6 +35,9 @@ export class ViiteApiTestsStack extends Stack {
     })
 
     // SPA static content (from github /dist/ directory)
+    const cloudfrontOAI = new OriginAccessIdentity(this, 'cloudfrontOAI', {
+      comment: `Allows CloudFront access to S3 bucket`,
+    });
     const websiteBucket = new Bucket(this, 'S3BucketForWebsiteContent', {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
@@ -42,23 +45,12 @@ export class ViiteApiTestsStack extends Stack {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       objectOwnership: ObjectOwnership.BUCKET_OWNER_ENFORCED,
     });
+    websiteBucket.grantRead(cloudfrontOAI)
 
     // Cloudfront distribution
     // Huom jos cloudfront distron joutuu luomaan cdk:lla uusiksi (=tekee tarpeeksi rajuja muutoksia),
     // niin consolessa pitää käydä ensin poistamassa vanhasta distrosta alternate domain namet, jolloin uuden luonti onnistuu
-
-    const cloudfrontOAI = new OriginAccessIdentity(this, 'cloudfrontOAI', {
-      comment: `Allows CloudFront access to S3 bucket`,
-    });
-
-    websiteBucket.addToResourcePolicy(
-      new PolicyStatement({
-        sid: 'Grant Cloudfront Origin Access Identity access to S3 bucket',
-        actions: ['s3:GetObject'],
-        resources: [websiteBucket.bucketArn + '/*'],
-        principals: [cloudfrontOAI.grantPrincipal],
-      })
-    );
+    //
     // certificate is located in us-east-1
     const cert = Certificate.fromCertificateArn(this, 'ac',
       'arn:aws:acm:us-east-1:783354560127:certificate/d2c9d643-0571-4833-ae00-2da45431a9ea'
@@ -76,8 +68,8 @@ export class ViiteApiTestsStack extends Stack {
         logIncludesCookies: true,
         errorResponses: [
             {
-                // 403 on otettu kiinni jotta saadaan cloudfrontin s3 bucketti toimimaan.
-                httpStatus: 403,
+                // 404 on otettu kiinni jotta saadaan cloudfrontin s3 bucketti toimimaan.
+                httpStatus: 404,
                 responseHttpStatus: 200,
                 ttl: Duration.minutes(10),
                 responsePagePath: '/index.html',
@@ -114,8 +106,13 @@ export class ViiteApiTestsStack extends Stack {
     const keyGroup = new KeyGroup(this, 'MyKeyGroup', {
       items: [publicKey],
     });
+    const dataOAI = new OriginAccessIdentity(this, 'dataOAI', {
+      comment: `Allows CloudFront access to S3 data bucket`,
+    });
     const dataOrigin = new S3Origin(bucket, {
+      originAccessIdentity: dataOAI
     })
+    bucket.grantRead(dataOAI)
     cdn.addBehavior('/data/*', dataOrigin, {
       allowedMethods: AllowedMethods.ALLOW_ALL,
       cachePolicy: noCachePolicy,
@@ -147,7 +144,8 @@ export class ViiteApiTestsStack extends Stack {
     // ETL Lambda
     const etlLambda = new NodejsFunction(this, 'etllambda', {
       runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(30),
+      timeout: Duration.seconds(50),
+      memorySize: 360,
       //code: Code.fromAsset('src'), // The output from `tsc`
       entry: './src/lambda/etl.ts',
       handler: 'handler',
