@@ -1,18 +1,18 @@
 meta {
-  name: Returns the nodes changed after the given moment. May be restricted to an interval, too.
+  name: Returns all the road addresses of the municipality stated as the municipality parameter.
   type: http
   seq: 1
 }
 
 get {
-  url: {{baseUrl}}/api/viite/integration/linear_location/changes?since={{since_var}}
+  url: {{baseUrl}}/api/viite/integration/road_address?municipality={{municipality_var}}
   body: none
   auth: none
 }
 
 params:query {
-  since: {{since_var}}
-  ~until: {{until_var}}
+  municipality: {{municipality_var}}
+  ~situationDate: {{situationDate_var}}
 }
 
 headers {
@@ -20,8 +20,8 @@ headers {
 }
 
 vars:pre-request {
-  since_var: 2024-01-01
-  until_var: 2024-06-01
+  situationDate_var: 1989-01-01
+  municipality_var: 005
 }
 
 assert {
@@ -35,11 +35,11 @@ tests {
   const { common_schema_test_for_response_data_and_schema_js_file, parse_test_data_from_json_file } = require('./tests/common_tests/common_schema_test_for_all.js');
   const { common_tests_for_all } = require('./tests/common_tests/common_tests_for_all.js');
   const { common_tests_for_valid_credentials } = require('./tests/common_tests/common_tests_for_valid_credentials.js');
-  
+    
   const data = res.body;
   // const data = parse_test_data_from_json_file('./tests/api/viite/integration/summary', 'test_data_for_valid_credentials.json'); 
   
-  common_schema_test_for_response_data_and_schema_js_file(data, './tests/api/viite/integration/linear_location/changes', 'schema_for_valid_credentials.js'); 
+  common_schema_test_for_response_data_and_schema_js_file(data, './tests/api/viite/integration/road_address', 'schema_for_valid_credentials.js'); 
   common_tests_for_all(); 
   common_tests_for_valid_credentials();
   
