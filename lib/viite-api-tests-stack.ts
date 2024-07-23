@@ -10,10 +10,10 @@ import { ApplicationLoadBalancer, ApplicationTargetGroup, ListenerAction, Target
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { CodePipeline } from 'aws-cdk-lib/aws-events-targets';
-import { CanonicalUserPrincipal, ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { CanonicalUserPrincipal, ManagedPolicy, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { FunctionUrlAuthType, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { BlockPublicAccess, Bucket, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket, CfnBucketPolicy, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
@@ -23,7 +23,7 @@ export class ViiteApiTestsStack extends Stack {
     super(scope, id, props);
 
     // Test results
-    const bucket = !true ? new Bucket(this, 'S3BucketForTestResults', {
+    const dataBucket = !true ? new Bucket(this, 'S3BucketForTestResults', {
       removalPolicy: RemovalPolicy.RETAIN,
       autoDeleteObjects: false,
       bucketName: `finnishtransportagency-viite-api-tests`,
@@ -33,17 +33,41 @@ export class ViiteApiTestsStack extends Stack {
     : Bucket.fromBucketAttributes(this, 'S3BucketForTestResults', {
       bucketName: 'finnishtransportagency-viite-api-tests'
     })
+    const dataOAI = new OriginAccessIdentity(this, 'dataOAI', {
+      comment: `Allows CloudFront access to S3 data bucket`,
+    });
+    /**
+     * WARNING! If the bucket exists no policy statement is added (you need to add by hand)
+     * cdk bug https://github.com/aws/aws-cdk/issues/6548
+     */
+    dataBucket.grantRead(dataOAI)
+    const policyStatement = new PolicyStatement();
+    policyStatement.addActions('s3:GetBucket*');
+    policyStatement.addActions('s3:GetObject*');
+    policyStatement.addActions('s3:List*');
+    policyStatement.addResources(dataBucket.bucketArn);
+    policyStatement.addResources(`${dataBucket.bucketArn}/*`);
+    policyStatement.addCanonicalUserPrincipal(dataOAI.cloudFrontOriginAccessIdentityS3CanonicalUserId);
+    new CfnBucketPolicy(this, 'cloudfrontAccessBucketPolicy', {
+      bucket: dataBucket.bucketName,
+      policyDocument: new PolicyDocument({
+        statements: [
+          policyStatement
+        ]
+      })
+    })
+
 
     // SPA static content (from github /dist/ directory)
-    const cloudfrontOAI = new OriginAccessIdentity(this, 'cloudfrontOAI', {
-      comment: `Allows CloudFront access to S3 bucket`,
-    });
     const websiteBucket = new Bucket(this, 'S3BucketForWebsiteContent', {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       bucketName: `finnishtransportagency-viite-api-tests-frontend`,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
       objectOwnership: ObjectOwnership.BUCKET_OWNER_ENFORCED,
+    });
+    const cloudfrontOAI = new OriginAccessIdentity(this, 'cloudfrontOAI', {
+      comment: `Allows CloudFront access to S3 bucket`,
     });
     websiteBucket.grantRead(cloudfrontOAI)
 
@@ -106,23 +130,17 @@ export class ViiteApiTestsStack extends Stack {
     const keyGroup = new KeyGroup(this, 'MyKeyGroup', {
       items: [publicKey],
     });
-    const dataOAI = new OriginAccessIdentity(this, 'dataOAI', {
-      comment: `Allows CloudFront access to S3 data bucket`,
-    });
-    const dataOrigin = new S3Origin(bucket, {
-      originAccessIdentity: dataOAI
-    })
-    bucket.grantRead(dataOAI)
-    cdn.addBehavior('/data/*', dataOrigin, {
+    cdn.addBehavior('/data/*', new S3Origin(dataBucket, { originAccessIdentity: dataOAI }), {
       allowedMethods: AllowedMethods.ALLOW_ALL,
       cachePolicy: noCachePolicy,
+      compress: true,
       viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       //responseHeadersPolicy: apiHeaderPolicy,
-      originRequestPolicy: OriginRequestPolicy.ALL_VIEWER,
+      originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
       trustedKeyGroups: [ keyGroup ],
     });
 
-    cdn.addBehavior('/authenticate/*', new HttpOrigin('viiteapitest-proxy.testivaylapilvi.fi'), {
+    cdn.addBehavior('/oauth2/*', new HttpOrigin('viiteapitest-proxy.testivaylapilvi.fi'), {
       allowedMethods: AllowedMethods.ALLOW_ALL,
       cachePolicy: noCachePolicy,
       viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -153,10 +171,10 @@ export class ViiteApiTestsStack extends Stack {
         minify: true,
       },
       environment: {
-        BUCKET: bucket.bucketName
+        BUCKET: dataBucket.bucketName
       }
     })
-    bucket.grantReadWrite(etlLambda)
+    dataBucket.grantReadWrite(etlLambda)
 
     // create build project
     const runTests = new Project(this,'buildProject',{
@@ -177,16 +195,16 @@ export class ViiteApiTestsStack extends Stack {
           },
           build: {
             commands: [
-              `export TARGET=\`date --iso-8601=seconds\``,
+              `export TARGET=\`date -u +"%Y-%m-%dT%H:%M:%SZ"\``,
               `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `export QAKEY=\`aws ssm get-parameter --name '/qa/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `export PRODKEY=\`aws ssm get-parameter --name '/prod/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `BASE='https://devapi.testivaylapilvi.fi/viite' APIKEY=$DEVKEY npx bru run --env dev --output results-dev.json || true`,
               `BASE='https://api.testivaylapilvi.fi/viite' APIKEY=$QAKEY npx bru run --env dev --output results-qa.json || true`,
               `BASE='https://api.vaylapilvi.fi/viite' APIKEY=$PRODKEY npx bru run --env dev --output results-prod.json || true`,
-              `aws s3 cp results-dev.json s3://${bucket.bucketName}/$TARGET/`,
-              `aws s3 cp results-qa.json s3://${bucket.bucketName}/$TARGET/`,
-              `aws s3 cp results-prod.json s3://${bucket.bucketName}/$TARGET/`,
+              `aws s3 cp results-dev.json s3://${dataBucket.bucketName}/$TARGET/`,
+              `aws s3 cp results-qa.json s3://${dataBucket.bucketName}/$TARGET/`,
+              `aws s3 cp results-prod.json s3://${dataBucket.bucketName}/$TARGET/`,
               `aws s3 cp ./dist s3://${websiteBucket.bucketName}/ --recursive`
             ],
           },
@@ -197,15 +215,12 @@ export class ViiteApiTestsStack extends Stack {
     qakey.grantRead(runTests.role!)
     prodkey.grantRead(runTests.role!)
     runTests.role?.addManagedPolicy(ManagedPolicy.fromManagedPolicyArn(this,'cfPolicy','arn:aws:iam::aws:policy/AdministratorAccess'))
-    bucket.grantReadWrite(runTests.role!)
+    dataBucket.grantReadWrite(runTests.role!)
 
     // Create dev-pipeline and add stages
     const pipeline = new Pipeline(this, `ApiTestPipeline`, {
       pipelineName: `viite-api-tests`
     });
-    console.log(Secret.fromSecretAttributes(this, 'GitHubToken222', {
-      secretCompleteArn: 'arn:aws:secretsmanager:eu-west-1:783354560127:secret:github/oauth/token-mRI6v3'
-    }).secretValue.unsafeUnwrap())
 
     const sourceOutput = new Artifact();
 
@@ -258,6 +273,7 @@ export class ViiteApiTestsStack extends Stack {
         minify: true,
       },
       environment: {
+        DOMAIN: 'viiteapitest.testivaylapilvi.fi',
         DISTRIBUTION_DOMAIN: cdn.distributionDomainName,
         KEY_PAIR_ID: publicKey.publicKeyId,
       }
@@ -290,18 +306,23 @@ export class ViiteApiTestsStack extends Stack {
       vpc,
       internetFacing: false,
       securityGroup: albSg,
+
     })
 
+    let targetGrp;
     const listener = lb.addListener('Listener', { port: 80 });
     listener.addAction('Default', {
       //priority: 100, //default priority
       //conditions: [],
-      action: ListenerAction.forward([new ApplicationTargetGroup(this, `AppTargetGrp`, {
+      action: ListenerAction.forward([targetGrp = new ApplicationTargetGroup(this, `AppTargetGrp`, {
+
           targetType: TargetType.LAMBDA,
           targets: [new LambdaTarget(auth)],
+
         })
       ])
     })
+    targetGrp.setAttribute('lambda.multi_value_headers.enabled', 'true')
 
 
 
