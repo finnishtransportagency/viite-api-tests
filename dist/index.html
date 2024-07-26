@@ -69,11 +69,11 @@
             // d3.json("http://localhost:3000/summary.json").then( data => { // TOIMII
             // d3.json("https://viiteapitest.testivaylapilvi.fi/data/summary.json").then( data => {
 
-            fetch("http://localhost:3000/summary.json") // TOIMII
+            // fetch("http://localhost:3000/summary.json") // TOIMII
             // fetch("http://localhost:3000/data/summary.json")
             // fetch('https://viiteapitest.testivaylapilvi.fi/data/summary.json')
             // fetch('https://viiteapitest.testivaylapilvi.fi/data/summary.json', { mode: "no-cors" } )
-            // fetch('./data/summary.json')
+            fetch('./data/summary.json')
             .then(response => {
                 if (!response.ok) {
                     // console.log(response);
