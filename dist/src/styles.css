@@ -1,0 +1,75 @@
+* {
+    font-family: Tahoma, Arial, sans-serif;
+}
+body {
+    margin: 10px 20px;
+    /* margin: 0; */
+}
+#my_dataviz {
+    position: relative; 
+    /* width: 100vw; */ /* 100% ikkunan leveydestä */
+    /* width: 100%; */ /* Olisiko parempi ? */
+    width: calc(100% - 40px);
+    /* height: 600px; */ /* Valitse sopiva korkeus */
+    height: calc(100vh - 80px);
+    top: 40px;
+    /* position: absolute;
+    top: 0;
+    left: 0; */
+    border: 1px solid #0064AF;
+}
+svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* SVG leveydeksi 100% #my_dataviz elementistä */
+    height: 100%; /* SVG korkeus 100% #my_dataviz elementistä */
+    /* border: 1px solid #0064AF; */
+}
+.tooltip {
+    font-family: Tahoma, Arial, sans-serif;
+    color: #0064AF;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 1px solid black;
+    padding: 5px;
+    background-color: white;
+    pointer-events: none; /* This ensures the tooltip doesn't block mouse events */
+    display: none; /* Initially hide the tooltip */
+
+}
+circle:hover {
+    cursor: pointer;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: Tahoma, Arial, sans-serif;
+    color: #0064AF;
+}
+.legend:hover {
+    cursor: pointer;
+}
+.legend {
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 14px;
+}
+.legend rect {
+    fill: none;
+    stroke-width: 2px;
+}
+.legend text {
+    fill: black;
+    font-weight: bold;
+}
+.dimmed {
+    opacity: 0.3;
+}
+.hidden {
+    display: none; 
+}
+.content {
+    display: none;
+}
+.active {
+    display: block;
+}
