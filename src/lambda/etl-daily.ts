@@ -26,7 +26,7 @@ const readData = async () => {
                   total: o.summary.totalTests,
                   tests: o.results.map((x:any) => ({
                     test: `${x.request.method} ${x.request.url}`,
-                    status: (x.assertionResults + x.testResults).some((s: { status: string; }) => s.status == 'fail') ? 'fail': 'pass',
+                    status: (x.assertionResults.concat(x.testResults)).some((s: { status: string; }) => s.status == 'fail') ? 'fail': 'pass',
                     responseTime: o.response.responseTime,
                   }))
                 }
