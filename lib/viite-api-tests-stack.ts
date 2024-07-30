@@ -173,7 +173,7 @@ export class ViiteApiTestsStack extends Stack {
     // ETL Lambda
     const etlLambda = new NodejsFunction(this, 'etllambda', {
       runtime: Runtime.NODEJS_20_X,
-      timeout: Duration.seconds(50),
+      timeout: Duration.seconds(900),
       memorySize: 4*1024,
       //code: Code.fromAsset('src'), // The output from `tsc`
       entry: './src/lambda/etl.ts',
@@ -186,6 +186,22 @@ export class ViiteApiTestsStack extends Stack {
       }
     })
     dataBucket.grantReadWrite(etlLambda)
+
+    const etlDailyLambda = new NodejsFunction(this, 'etldailylambda', {
+      runtime: Runtime.NODEJS_20_X,
+      timeout: Duration.seconds(900),
+      memorySize: 256,
+      //code: Code.fromAsset('src'), // The output from `tsc`
+      entry: './src/lambda/etl-daily.ts',
+      handler: 'handler',
+      bundling: {
+        minify: true,
+      },
+      environment: {
+        BUCKET: dataBucket.bucketName
+      }
+    })
+    dataBucket.grantReadWrite(etlDailyLambda)
 
     // create build project
     const runTests = new Project(this,'buildProject',{
@@ -267,10 +283,19 @@ export class ViiteApiTestsStack extends Stack {
       ]
     })
     pipeline.addStage({
-      stageName: 'ETLProcess',
+      stageName: 'ETLProcess1',
       actions: [
         new LambdaInvokeAction({
-          actionName: 'RunETL',
+          actionName: 'RunETL1',
+          lambda: etlDailyLambda,
+        })
+      ]
+    })
+    pipeline.addStage({
+      stageName: 'ETLProcess2',
+      actions: [
+        new LambdaInvokeAction({
+          actionName: 'RunETL2',
           lambda: etlLambda,
         })
       ]

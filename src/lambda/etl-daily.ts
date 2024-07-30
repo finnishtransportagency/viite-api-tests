@@ -14,16 +14,32 @@ const readData = async () => {
 
             const key = `data/${dir}daily.json`
             if (!(await s3has(process.env.BUCKET!, key))) {
-              const daily = await s3get(process.env.BUCKET!, key)
-              data[dir] = {
-                  dev: daily.dev.passed,
-                  qa: daily.qa.passed,
-                  prod: daily.prod.passed
+              const dev = await s3get(process.env.BUCKET!, `${dir}results-dev.json`)
+              const qa = await s3get(process.env.BUCKET!, `${dir}results-qa.json`)
+              const prod = await s3get(process.env.BUCKET!, `${dir}results-prod.json`)
+  
+              const dailyData = (obj:any) => {
+                const o = obj[0]
+                const data = {
+                  date: dir.replace(/\//, ''),
+                  passed: o.summary.totalAssertions + o.summary.passedTests,
+                  total: o.summary.totalTests,
+                  tests: o.results.map((x:any) => ({
+                    test: `${x.request.method} ${x.request.url}`,
+                    status: (x.assertionResults + x.testResults).some((s: { status: string; }) => s.status == 'fail') ? 'fail': 'pass',
+                    responseTime: o.response.responseTime,
+                  }))
+                }
               }
-          }
+  
+              data[dir] = {
+                  dev: dailyData(dev),
+                  qa: dailyData(qa),
+                  prod: dailyData(prod)
+              }
+              await s3put(process.env.BUCKET!, key, data)
+            }
         });
-    console.log('all done')
-    await s3put(process.env.BUCKET!, 'data/summary.json', data)
 }
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
