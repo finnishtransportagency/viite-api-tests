@@ -174,7 +174,7 @@ export class ViiteApiTestsStack extends Stack {
     const etlLambda = new NodejsFunction(this, 'etllambda', {
       runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(50),
-      memorySize: 1024,
+      memorySize: 4*1024,
       //code: Code.fromAsset('src'), // The output from `tsc`
       entry: './src/lambda/etl.ts',
       handler: 'handler',
