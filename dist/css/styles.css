@@ -5,11 +5,11 @@ body {
     margin: 10px 20px;
     /* margin: 0; */
 }
-#my_dataviz {
+#my_dataviz, #environments_dataviz, #environment_requests_dataviz {
     position: relative; 
     /* width: 100vw; */ /* 100% ikkunan leveydestä */
-    /* width: 100%; */ /* Olisiko parempi ? */
-    width: calc(100% - 40px);
+    width: 100%; /* Olisiko parempi ? */
+    /* width: calc(100% - 40px); */ /* Tätä arvoa käytetty 29.7.2024 asti */
     /* height: 600px; */ /* Valitse sopiva korkeus */
     height: calc(100vh - 80px);
     top: 40px;
@@ -19,14 +19,15 @@ body {
     border: 1px solid #0064AF;
 }
 svg {
-    position: absolute;
+    position: absolute; /* Voi joutua muuttamaan relative arvoksi, jos kuvaajia on useampia kuin yksi.*/
+    /* position: relative; */
     top: 0;
     left: 0;
     width: 100%; /* SVG leveydeksi 100% #my_dataviz elementistä */
     height: 100%; /* SVG korkeus 100% #my_dataviz elementistä */
     /* border: 1px solid #0064AF; */
 }
-.tooltip {
+.tooltip, .environments_tooltip, .environment_requests_tooltip {
     font-family: Tahoma, Arial, sans-serif;
     color: #0064AF;
     position: absolute;
@@ -46,6 +47,18 @@ h1, h2, h3, h4, h5, h6 {
     font-family: Tahoma, Arial, sans-serif;
     color: #0064AF;
 }
+.active {
+    display: block;
+}
+.content {
+    display: none;
+}
+.dimmed {
+    opacity: 0.3;
+}
+.hidden {
+    display: none; 
+}
 .legend:hover {
     cursor: pointer;
 }
@@ -60,16 +73,4 @@ h1, h2, h3, h4, h5, h6 {
 .legend text {
     fill: black;
     font-weight: bold;
-}
-.dimmed {
-    opacity: 0.3;
-}
-.hidden {
-    display: none; 
-}
-.content {
-    display: none;
-}
-.active {
-    display: block;
 }
