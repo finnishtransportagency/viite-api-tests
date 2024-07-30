@@ -1,7 +1,8 @@
 import { CfnDynamicReference, CfnDynamicReferenceService, Duration, RemovalPolicy, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { AllowedMethods, CacheCookieBehavior, CacheHeaderBehavior, CachePolicy, CacheQueryStringBehavior, Distribution, KeyGroup, OriginAccessIdentity, OriginRequestPolicy, PriceClass, PublicKey, SecurityPolicyProtocol, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { AllowedMethods, CacheCookieBehavior, CacheHeaderBehavior, CachePolicy, CacheQueryStringBehavior, Distribution, KeyGroup, LambdaEdgeEventType, OriginAccessIdentity, OriginRequestPolicy, PriceClass, PublicKey, SecurityPolicyProtocol, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin, S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as cf from 'aws-cdk-lib/aws-cloudfront';
 import { BuildSpec, ComputeType, LinuxBuildImage, Project } from 'aws-cdk-lib/aws-codebuild';
 import { Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction, GitHubSourceAction, LambdaInvokeAction } from 'aws-cdk-lib/aws-codepipeline-actions';
@@ -11,7 +12,7 @@ import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { CodePipeline } from 'aws-cdk-lib/aws-events-targets';
 import { CanonicalUserPrincipal, ManagedPolicy, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { FunctionUrlAuthType, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Code, Function, FunctionUrlAuthType, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BlockPublicAccess, Bucket, CfnBucketPolicy, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -139,6 +140,16 @@ export class ViiteApiTestsStack extends Stack {
       originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
       trustedKeyGroups: [ keyGroup ],
     });
+    // datetime directories
+    cdn.addBehavior('/202*/*', new S3Origin(dataBucket, { originAccessIdentity: dataOAI }), {
+      allowedMethods: AllowedMethods.ALLOW_ALL,
+      cachePolicy: noCachePolicy,
+      compress: true,
+      viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      //responseHeadersPolicy: apiHeaderPolicy,
+      originRequestPolicy: OriginRequestPolicy.CORS_S3_ORIGIN,
+      trustedKeyGroups: [ keyGroup ],
+    });
 
     cdn.addBehavior('/oauth2/*', new HttpOrigin('viiteapitest-proxy.testivaylapilvi.fi'), {
       allowedMethods: AllowedMethods.ALLOW_ALL,
@@ -163,7 +174,7 @@ export class ViiteApiTestsStack extends Stack {
     const etlLambda = new NodejsFunction(this, 'etllambda', {
       runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(50),
-      memorySize: 360,
+      memorySize: 1024,
       //code: Code.fromAsset('src'), // The output from `tsc`
       entry: './src/lambda/etl.ts',
       handler: 'handler',
@@ -195,6 +206,7 @@ export class ViiteApiTestsStack extends Stack {
           },
           build: {
             commands: [
+              'npx cdk deploy --all --exclusive --require-approval never',
               `export TARGET=\`date -u +"%Y-%m-%dT%H:%M:%SZ"\``,
               `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
               `export QAKEY=\`aws ssm get-parameter --name '/qa/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,

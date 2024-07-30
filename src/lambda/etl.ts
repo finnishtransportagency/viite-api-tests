@@ -29,7 +29,7 @@ const listDateDirectories = async (): Promise<string[]> => {
       continuationToken = response.NextContinuationToken;
     } while (continuationToken);
   
-    return dateDirectories;
+    return dateDirectories.sort();
   }
 
 export const s3get = async (Bucket:string, Key:string) => {
@@ -46,7 +46,7 @@ const readData = async () => {
     const dirs = await listDateDirectories()
     const data:any = {}
     await PromisePool
-        .withConcurrency(100)
+        .withConcurrency(30)
         .for(dirs)
         .process(async (dir) => {
             console.log(`Processing directory: ${dir}`);
@@ -63,7 +63,7 @@ const readData = async () => {
             }
         });
     console.log('all done')
-    await s3put(process.env.BUCKET!, 'summary.json', data)
+    await s3put(process.env.BUCKET!, 'data/summary.json', data)
 }
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
