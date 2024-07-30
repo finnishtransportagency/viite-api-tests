@@ -13,7 +13,7 @@ const readData = async () => {
             console.log(`Processing directory: ${dir}`);
 
             const key = `data/${dir}daily.json`
-            if (!(await s3has(process.env.BUCKET!, key))) {
+            if (await s3has(process.env.BUCKET!, key)) {
               const daily = await s3get(process.env.BUCKET!, key)
               data[dir] = {
                   dev: daily.dev.passed,

@@ -32,12 +32,16 @@ const readData = async () => {
                 }
               }
   
-              data[dir] = {
-                  dev: dailyData(dev),
-                  qa: dailyData(qa),
-                  prod: dailyData(prod)
+              try {
+                data[dir] = {
+                    dev: dailyData(dev),
+                    qa: dailyData(qa),
+                    prod: dailyData(prod)
+                }
+                await s3put(process.env.BUCKET!, key, data)
+              } catch (err) {
+                console.log(err)
               }
-              await s3put(process.env.BUCKET!, key, data)
             }
         });
 }
