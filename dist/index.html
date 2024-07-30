@@ -637,7 +637,7 @@
                 // fetch(`http://localhost:3000/results-${serverQueryParam}.json`) // TOIMII
                 // fetch(`http://localhost:3000/2024-07-14T00-00-00+00-00/results-qa.json`) // TOIMII
                 // fetch(`http://localhost:3000/2024-07-14T00-00-00+00-00/results-${serverQueryParam}.json`) // TOIMII
-                fetch(`http://localhost:3000/${timeValueQueryParam}/results-${serverQueryParam}.json`) // TOIMII
+                fetch(`./${timeValueQueryParam}/results-${serverQueryParam}.json`) // TOIMII
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
