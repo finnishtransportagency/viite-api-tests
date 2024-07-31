@@ -233,7 +233,8 @@ export class ViiteApiTestsStack extends Stack {
               `aws s3 cp results-dev.json s3://${dataBucket.bucketName}/$TARGET/`,
               `aws s3 cp results-qa.json s3://${dataBucket.bucketName}/$TARGET/`,
               `aws s3 cp results-prod.json s3://${dataBucket.bucketName}/$TARGET/`,
-              `aws s3 cp ./dist s3://${websiteBucket.bucketName}/ --recursive`
+              `aws s3 cp ./dist s3://${websiteBucket.bucketName}/ --recursive`,
+              `aws cloudfront create-invalidation --distribution-id E2ION4DK2QI6VQ --paths /index.html `
             ],
           },
         },
@@ -244,6 +245,7 @@ export class ViiteApiTestsStack extends Stack {
     prodkey.grantRead(runTests.role!)
     runTests.role?.addManagedPolicy(ManagedPolicy.fromManagedPolicyArn(this,'cfPolicy','arn:aws:iam::aws:policy/AdministratorAccess'))
     dataBucket.grantReadWrite(runTests.role!)
+    cdn.grantCreateInvalidation(runTests.role!)
 
     // Create dev-pipeline and add stages
     const pipeline = new Pipeline(this, `ApiTestPipeline`, {
