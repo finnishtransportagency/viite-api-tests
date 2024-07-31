@@ -7,7 +7,7 @@ import { putJobFailure, putJobSuccess } from "./pipeline";
 const readData = async () => {
     const dirs = await listDateDirectories(process.env.BUCKET!)
     const data:any = {}
-    const responseTimes:any = {}
+    const responseTimes:any = []
     for (const dir of dirs) {
       console.log(`Processing directory: ${dir}`);
 
