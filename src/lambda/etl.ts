@@ -6,24 +6,32 @@ import { listDateDirectories, s3get, s3has, s3put } from './s3';
 const readData = async () => {
     const dirs = await listDateDirectories(process.env.BUCKET!)
     const data:any = {}
+    const responseTimes:any = {}
     await PromisePool
         .withConcurrency(30)
         .for(dirs)
         .process(async (dir) => {
             console.log(`Processing directory: ${dir}`);
 
+            const date = dir.replace(/\//g,'')
             const key = `data/${dir}daily.json`
             if (await s3has(process.env.BUCKET!, key)) {
               const daily = await s3get(process.env.BUCKET!, key)
-              data[dir] = {
+              data[date] = {
                   dev: daily.dev.passed,
                   qa: daily.qa.passed,
                   prod: daily.prod.passed
+              }
+              for (const env of Object.keys(daily)) {
+                for (const test of daily[env].tests) {
+                  responseTimes.push({ timestamp: date, responseTime: test.responseTime, test: test.test, env })
+                }
               }
           }
         });
     console.log('all done')
     await s3put(process.env.BUCKET!, 'data/summary.json', data)
+    await s3put(process.env.BUCKET!, 'data/responseTimes.json', responseTimes)
 }
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
