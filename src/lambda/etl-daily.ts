@@ -8,7 +8,7 @@ const readData = async () => {
     const dirs = await listDateDirectories(process.env.BUCKET!)
     const data:any = {}
     await PromisePool
-        .withConcurrency(30)
+        .withConcurrency(5)
         .for(dirs)
         .process(async (dir) => {
             console.log(`Processing directory: ${dir}`);
@@ -22,7 +22,7 @@ const readData = async () => {
               const dailyData = (obj:any) => {
                 const o = obj[0]
                 const data = {
-                  date: dir.replace(/\//, ''),
+                  date: dir.replace(/\//g, ''),
                   passed: o.summary.totalAssertions + o.summary.passedTests,
                   total: o.summary.totalTests,
                   tests: o.results.map((x:any) => ({
