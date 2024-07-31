@@ -31,7 +31,7 @@ const readData = async () => {
         }
 
         try {
-          data[dir] = {
+          const data = {
               dev: dailyData(dev),
               qa: dailyData(qa),
               prod: dailyData(prod)
