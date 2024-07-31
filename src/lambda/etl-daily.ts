@@ -2,6 +2,7 @@ import { CodePipelineClient, PutJobSuccessResultCommand, PutJobFailureResultComm
 import { APIGatewayProxyEvent, Context, APIGatewayProxyResult } from "aws-lambda"; // Import types for Lambda functions
 import { PromisePool } from '@supercharge/promise-pool';
 import { listDateDirectories, s3get, s3has, s3put } from './s3';
+import { putJobFailure, putJobSuccess } from "./pipeline";
 
 const readData = async () => {
     const dirs = await listDateDirectories(process.env.BUCKET!)
@@ -46,7 +47,7 @@ const readData = async () => {
         });
 }
 
-export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<string> => {
   const codePipelineClient = new CodePipelineClient({});
   const jobId = event['CodePipeline.job'].id;
 
@@ -56,32 +57,11 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 
     await readData()
 
-    // Notify CodePipeline of successful job completion
-    const putJobSuccessCommand = new PutJobSuccessResultCommand({ jobId });
-    await codePipelineClient.send(putJobSuccessCommand);
+    return await putJobSuccess(jobId, "All done.");
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify('Job Succeeded'),
-    };
   } catch (error) {
     console.error('Job Failed:', error);
-
-    // Notify CodePipeline of job failure
-    const putJobFailureCommand = new PutJobFailureResultCommand({
-      jobId,
-      failureDetails: {
-        message: JSON.stringify(error),
-        type: 'JobFailed', // Modify based on error type
-      },
-    });
-
-    await codePipelineClient.send(putJobFailureCommand);
-
-    return {
-      statusCode: 500,
-      body: JSON.stringify('Job Failed'),
-    };
+    return await putJobFailure(jobId, "All done error."+error);
   }
 };
 
