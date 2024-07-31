@@ -1,20 +1,16 @@
-const AWS = require('aws-sdk');
-const codepipeline = new AWS.CodePipeline();
+import { CodePipelineClient, PutJobSuccessResultCommand, PutJobFailureResultCommand } from '@aws-sdk/client-codepipeline';
 
-export const putJobSuccess = async (jobId:any, message:string) => {
-  await codepipeline.putJobSuccessResult({
-      jobId: jobId
-  }).promise();
+const codepipeline = new CodePipelineClient({});
+
+export const putJobSuccess = async (jobId: string, message: string) => {
+  await codepipeline.send(new PutJobSuccessResultCommand({ jobId }));
   return message;
 };
 
-export const putJobFailure = async (jobId:any, message:string) => {
-  await codepipeline.putJobFailureResult({
-      jobId: jobId,
-      failureDetails: {
-          message: JSON.stringify(message),
-          type: 'JobFailed',
-      }
-  }).promise();
+export const putJobFailure = async (jobId: string, message: string) => {
+  await codepipeline.send(new PutJobFailureResultCommand({
+    jobId,
+    failureDetails: { message: JSON.stringify(message), type: 'JobFailed' }
+  }));
   return message;
 };
