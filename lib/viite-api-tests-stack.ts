@@ -190,7 +190,7 @@ export class ViiteApiTestsStack extends Stack {
     const etlDailyLambda = new NodejsFunction(this, 'etldailylambda', {
       runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(900),
-      memorySize: 6*256,
+      memorySize: 3*256,
       //code: Code.fromAsset('src'), // The output from `tsc`
       entry: './src/lambda/etl-daily.ts',
       handler: 'handler',

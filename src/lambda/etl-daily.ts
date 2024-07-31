@@ -27,6 +27,7 @@ const readData = async () => {
               responseTime: x.response.responseTime,
             }))
           }
+          return data
         }
 
         try {
