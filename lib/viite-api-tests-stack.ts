@@ -222,6 +222,7 @@ export class ViiteApiTestsStack extends Stack {
           },
           build: {
             commands: [
+              'npx bru --version',
               'npx cdk deploy --all --exclusive --require-approval never',
               `export TARGET=\`date -u +"%Y-%m-%dT%H:%M:%SZ"\``,
               `export DEVKEY=\`aws ssm get-parameter --name '/dev/viite/apiGateway' --with-decryption | jq -r .Parameter.Value\``,
