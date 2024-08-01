@@ -5,14 +5,16 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/changes/road_numbers?since={{sinceVar}}&until={{untilVar}}
+  url: {{baseUrl}}/api/viite/changes/road_numbers?since=2023-09-01&until=2024-06-01
   body: none
   auth: none
 }
 
 params:query {
-  since: {{sinceVar}}
-  until: {{untilVar}}
+  since: 2023-09-01
+  until: 2024-06-01
+  ~since: {{since_var}}
+  ~until: {{until_var}}
 }
 
 headers {
@@ -20,8 +22,8 @@ headers {
 }
 
 vars:pre-request {
-  sinceVar: 2023-09-01
-  untilVar: 2024-06-01
+  since_var: 2023-09-01
+  until_var: 2024-06-01
 }
 
 assert {
