@@ -19,7 +19,7 @@ const readData = async () => {
           const o = obj[0]
           const data = {
             date: dir.replace(/\//g, ''),
-            passed: o.summary.totalAssertions + o.summary.passedTests,
+            passed: o.summary.passedAssertions + o.summary.passedTests,
             total: o.summary.totalTests,
             tests: o.results.map((x:any) => ({
               test: `${x.request.method} ${x.request.url}`,
