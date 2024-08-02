@@ -96,7 +96,7 @@
 
                 // const url = `${baseURL}${timeValueQueryParam}/results-${environmentQueryParam}.json`;
                 const url = `${baseURL}${getDateTimeByEnvironment(timeValueQueryParam)}/results-${environmentQueryParam}.json`;
-                fetchDataAndHandleErrors(url, "my_dataviz", showDailySummary);
+                fetchDataAndHandleErrors(url, "my_dataviz", showDailyResults);
 
                 /*
                 try {
@@ -117,9 +117,8 @@
                 // document.getElementById('daily_summary').classList.remove('content');
                 // document.getElementById('daily_summary').classList.add('active');
                 // fetchDataAndShowDailySummary();
-
-                // const url = `${baseURL}${getDateTimeByEnvironment(timeValueQueryParam)}/results-${environmentQueryParam}.json`;
-                // fetchDataAndHandleErrors(url, "my_dataviz", showDailySummary);
+                const url = `${baseURL}${getDateTimeByEnvironment(timeValueQueryParam)}/results-${environmentQueryParam}.json`;
+                fetchDataAndHandleErrors(url, "my_dataviz", showDailyResults);
 
                 /*
                 try {
@@ -334,7 +333,7 @@
          *************
          *************/
 
-        function showGraph(data, dataReady, dataSeries, divContainerId, xLabel, yLabel) {
+        function showGraph(data, dataReady, dataSeries, divContainerId, xLabel, yLabel, createCircles) {
 
 
             // console.log("data:", data);
@@ -672,30 +671,33 @@
                     .style("fill", "none");
 
             // Add circles
-            scatter
-                // First we need to enter in a group
-                .selectAll("myDots")
-                .data(dataReady)
-                .join('g')
-                    .attr('data-env', d => d.name)
-                    .style("fill", d => myColor(d.name))
-                // Second we need to enter in the 'values' part of this group
-                .selectAll("myPoints")
-                .data(d => d.values)
-                .join("circle")
-                    .attr("data-env", (d, i, nodes) => {
-                        // `nodes` are the circle DOM elements, and we can use the parent `g` element to get the data-env
-                        const parentG = d3.select(nodes[i].parentNode); // Select the parent <g> element
-                        return parentG.attr('data-env'); // Get the data-env attribute value from the parent <g>
-                    })
-                    // .attr("data-env", d => d.environment)
-                    .attr("cx", d => x(new Date(d.date)))
-                    .attr("cy", d => y(d.value))
-                    .attr("r", 5)
-                    .attr("stroke", "white")
-                    .on("mouseover", mouseover)
-                    .on("mouseout", mouseout)
-                    .on("click", mouseclick);
+            if (createCircles) {
+
+                scatter
+                    // First we need to enter in a group
+                    .selectAll("myDots")
+                    .data(dataReady)
+                    .join('g')
+                        .attr('data-env', d => d.name)
+                        .style("fill", d => myColor(d.name))
+                    // Second we need to enter in the 'values' part of this group
+                    .selectAll("myPoints")
+                    .data(d => d.values)
+                    .join("circle")
+                        .attr("data-env", (d, i, nodes) => {
+                            // `nodes` are the circle DOM elements, and we can use the parent `g` element to get the data-env
+                            const parentG = d3.select(nodes[i].parentNode); // Select the parent <g> element
+                            return parentG.attr('data-env'); // Get the data-env attribute value from the parent <g>
+                        })
+                        // .attr("data-env", d => d.environment)
+                        .attr("cx", d => x(new Date(d.date)))
+                        .attr("cy", d => y(d.value))
+                        .attr("r", 5)
+                        .attr("stroke", "white")
+                        .on("mouseover", mouseover)
+                        .on("mouseout", mouseout)
+                        .on("click", mouseclick);
+            }
 
             /*************
              * Functions *
@@ -769,14 +771,14 @@
 
             function createXAxis(scale) {       
 
-                const tickIntervals = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Possible day intervals
+                const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Possible day intervals
                 let minDistance = 50; // Minimum pixel distance between ticks
 
                 let tickInterval = tickIntervals[0];
                 for (let i = 1; i < tickIntervals.length; i++) {
                     const interval = tickIntervals[i];
-                    const ticks = scale.ticks(d3.timeDay.every(interval));
-                    minDistance = ticks.length + 60;
+                    const ticks = scale.ticks(d3.timeDay.every(interval))
+                    minDistance = ticks.length + 50;
                     const avgTickDistance = width / ticks.length;
                     if (avgTickDistance >= minDistance) {
                         tickInterval = interval;
@@ -979,10 +981,14 @@
                     );
 
                 // update circles
-                scatter
-                    .selectAll("circle")
-                    .attr("cx", d => newX(new Date(d.date)))
-                    .attr("cy", d => newY(d.value));
+                if (createCircles) {
+
+                    scatter
+                        .selectAll("circle")
+                        .attr("cx", d => newX(new Date(d.date)))
+                        .attr("cy", d => newY(d.value));
+
+                }
             }
 
             /***********************
@@ -1125,9 +1131,13 @@
                 scatter.selectAll('path')
                     .attr('d', d => line(d.values));
 
-                scatter.selectAll('circle')
-                    .attr('cx', d => x(new Date(d.date)))
-                    .attr('cy', d => y(d.value));
+                if (createCircles) {
+
+                    scatter.selectAll('circle')
+                        .attr('cx', d => x(new Date(d.date)))
+                        .attr('cy', d => y(d.value));
+                
+                }
 
                 // Remove and update legend
                 svg.selectAll(".legend").remove(); // Remove existing legends
@@ -1182,7 +1192,7 @@
             console.log("parsedData (showEnvironmentsGraph):", parsedData);
             console.log("dataReady (showEnvironmentsGraph):", dataReady);
 
-            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Passed Tests [pcs]");
+            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Passed Tests [pcs]", true);
         }
 
         function showEnvironmentRequestsGraph(data, divContainerId) {
@@ -1257,7 +1267,7 @@
             console.log("parsedData (showEnvironmentRequestsGraph):", parsedData);
             console.log("dataReady (showEnvironmentRequestsGraph):", dataReady);
             
-            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Response Time [ms]");
+            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Response Time [ms]", false);
         }
 
         function reminder() {
@@ -1284,9 +1294,13 @@
 
         function getSignByBoolean(isTrue) {
             if (isTrue) {
-                return '<span style="color: green; font-size: 20px;">&#10003;</span>';
+                // return '<span style="color: green; font-size: 20px;">&#10003;</span>';
+                // return '<span style="font-size: 14px; color: green;">&#10003;</span>';
+                return '<span style="color: green;">&#10003;</span>';
             }
-            return '<span style="color: red; font-size: 20px;">&#10060;</span>';
+            // return '<span style="color: red; font-size: 20px;">&#10060;</span>';
+            // return '<span style="font-size: 14px; color: red">&#10007;</span>';
+            return '<span style="color: red">&#10007;</span>';
         }
             
         function getSignByResult(result) {
@@ -1309,11 +1323,182 @@
             // document.getElementById('daily_result_information').appendChild(horizontalLine);
         }
 
+        function showDailyResults(data) {
+            let dataEntryIndex = 0;
+            const dataEntry = data[dataEntryIndex]; 
+            const result = dataEntry.results[resultIndexQueryParam];
+
+            console.log("Result:", result.assertionResults[0]);
+
+            let passedAssertionAmount = 0;
+            let totalAssertionAmount = result.assertionResults.length;
+
+            let passedTestAmount = 0;
+            let totalTestAmount = result.testResults.length;
+
+            const header = document.createElement('h2');
+            header.innerText = "Request"; 
+            document.getElementById('daily_summary').appendChild(header); 
+
+            const content = document.createElement('p');
+
+            content.innerHTML = `<span id="request_result_sign_${resultIndexQueryParam}" class="request_result_sign"></span> <span id="request_result_${resultIndexQueryParam}"></span> <span id="request_result_numbers_${resultIndexQueryParam}"></span> ${result.request.method} ${result.request.url}`;
+            // content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${getDateTimeByEnvironment(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
+            document.getElementById('daily_summary').appendChild(content); 
+
+            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerText = `Runtime: ${Math.round(result.runtime * 1000)} ms`;
+            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerText = `Response time: ${result.response.responseTime} ms`;
+
+            const headerTestResults = document.createElement('h2');
+            headerTestResults.innerText = "Test Results"; 
+            document.getElementById('daily_summary').appendChild(headerTestResults); 
+
+            /* Assertion results */
+
+            const assertionResultDiv = document.createElement('div');
+            const assertionResultTable = document.createElement('table');
+
+            const testResultDiv = document.createElement('div');
+            const testResultTable = document.createElement('table');
+
+            for (let assertionResultIndex = 0; assertionResultIndex < result.assertionResults.length; assertionResultIndex++) {
+                const assertionResult = result.assertionResults[assertionResultIndex];
+                console.log(assertionResult);
+                if (assertionResult.status === 'pass') { 
+                    passedAssertionAmount++; 
+                }
+                // if (resultIndexQueryParam && resultIndexQueryParam == resultIndex) {
+                    assertionResultTable.innerHTML += `
+                        <tr>
+                            <td><span class="request_result_sign">${getSignByResult(assertionResult.status)}</span></td>
+                            <td>${assertionResult.status.toUpperCase()}</td>
+                            <td>${assertionResult.lhsExpr} ${assertionResult.rhsExpr}</td>
+                        </tr>
+                    `;
+                // }
+            }
+
+            /* Test results */
+
+            for (let testResultIndex = 0; testResultIndex < totalTestAmount; testResultIndex++) {
+                const testResult = result.testResults[testResultIndex];
+                if (testResult.status === 'pass') { 
+                    passedTestAmount++; 
+                }
+                // if (resultIndexQueryParam && resultIndexQueryParam == resultIndex) {
+                    let errorMessage = "";
+                    if (testResult.error) {
+                        errorMessage = `, ERROR: "${testResult.error}"`;
+                    }
+                    testResultTable.innerHTML += `
+                        <tr>
+                            <td><span class="request_result_sign">${getSignByResult(testResult.status)}</span></td>
+                            <td>${testResult.status.toUpperCase()}</td>
+                            <td>${testResult.description}${errorMessage}</td>
+                        </tr>
+                    `;
+                // }
+            }
+
+            assertionResultDiv.appendChild(assertionResultTable);
+            document.getElementById('daily_summary').appendChild(assertionResultDiv);     
+            testResultDiv.appendChild(testResultTable);
+            document.getElementById('daily_summary').appendChild(testResultDiv);
+
+            /*
+            const responseDiv = document.createElement('div');
+            responseDiv.innerHTML = `
+                Response: <br>
+                status: ${result.response.status}<br>
+                statusText: ${result.response.statusText}<br>
+                headers, date${result.response.headers.date}<br>
+                headers, content-length: ${result.response.headers["content-length"]}<br>
+                headers, connection: ${result.response.headers["connection"]}<br>
+                headers, set-cookie: ${result.response.headers["set-cookie"]}<br>
+                headers, server: ${result.response.headers["server"]}<br>
+                headers, x-amz-apigw-id: ${result.response.headers["x-amz-apigw-id"]}<br>
+                data: ${result.response.data}<br>
+                responseTime: ${result.response.responseTime}<br>
+            `;
+            document.getElementById('daily_summary').appendChild(responseDiv);
+            */
+
+            /*
+            const responseDiv = document.createElement('div');
+            const responseTableDiv = document.createElement('table');
+
+            for (const [key, value] of Object.entries(result.response.headers)) {
+                responseTableDiv.innerHTML += `
+                    <tr>
+                        <td>${key}</td>
+                        <td>${value}</td>
+                    </tr>
+                `;
+            }
+
+            responseDiv.appendChild(responseTableDiv);
+            document.getElementById('daily_summary').appendChild(responseDiv);  
+            
+            */
+ 
+
+
+            function appendRow(table, key, value, parentKey = '') {
+                const row = document.createElement('tr');
+                const keyCell = document.createElement('td');
+                const valueCell = document.createElement('td');
+
+                keyCell.textContent = parentKey ? `${parentKey}.${key}` : key;
+                valueCell.textContent = value;
+
+                row.appendChild(keyCell);
+                row.appendChild(valueCell);
+                table.appendChild(row);
+            }
+
+            function iterateNodeAndAddToTable(table, headers, parentKey = '') {
+                for (const [key, value] of Object.entries(headers)) {
+                    if (typeof value === 'object' && !Array.isArray(value)) {
+                        iterateNodeAndAddToTable(table, value, parentKey ? `${parentKey}.${key}` : key);
+                    } else {
+                        appendRow(table, key, value, parentKey);
+                    }
+                }
+            }
+
+            const headerResponse = document.createElement('h2');
+            headerResponse.innerText = "Response"; 
+            document.getElementById('daily_summary').appendChild(headerResponse); 
+
+            const responseDiv = document.createElement('div');
+            const responseTable = document.createElement('table');
+
+            iterateNodeAndAddToTable(responseTable, result.response);
+
+            responseDiv.appendChild(responseTable);
+            document.getElementById('daily_summary').appendChild(responseDiv);  
+
+
+
+            /* All assertions and tests passed */
+            console.log(passedAssertionAmount);
+            console.log(passedTestAmount);
+            console.log(totalAssertionAmount);
+            console.log(totalTestAmount);
+            const assertionsAndRequestsPassed = (passedAssertionAmount+passedTestAmount)/(totalAssertionAmount+totalTestAmount) === 1;
+            console.log(assertionsAndRequestsPassed);
+            document.getElementById(`request_result_sign_${resultIndexQueryParam}`).innerHTML = getSignByBoolean(assertionsAndRequestsPassed);
+            document.getElementById(`request_result_${resultIndexQueryParam}`).innerHTML = `${assertionsAndRequestsPassed ? "PASS" : "FAIL"}`;
+            document.getElementById(`request_result_numbers_${resultIndexQueryParam}`).innerHTML = `(${passedAssertionAmount+passedTestAmount}/${totalAssertionAmount+totalTestAmount})`;
+
+        }
+
         /********************
          ********************
          * showDailySummary *
          ********************
          ********************/
+
 
         function showDailySummary(data) {
 
@@ -1325,40 +1510,17 @@
 
             let dataEntryIndex = 0;
 
-            console.log(data)
+            // console.log(data)
 
             for (let dataIndex = 0; dataIndex < data.length; dataIndex++) {
                 dataEntry = data[dataIndex];
 
                 const contentDiv = document.createElement('div');
                 contentDiv.innerHTML = `
-                    <table>
-                        <tr>
-                            <td></td>
-                            <td>Passed</td>
-                            <td>Failed</td>
-                            <td>Total</td>
-                        </tr>
-                        <tr>
-                            <td>Requests</td>
-                            <td>${dataEntry.summary.passedRequests}</td>
-                            <td>${dataEntry.summary.failedRequests}</td>
-                            <td>${dataEntry.summary.totalRequests}</td>
-                        </tr>
-                        <tr>
-                            <td>Assertions</td>
-                            <td>${dataEntry.summary.passedAssertions}</td>
-                            <td>${dataEntry.summary.failedAssertions}</td>
-                            <td>${dataEntry.summary.totalAssertions}</td>
-                        </tr>
-                        <tr>
-                            <td>Tests</td>
-                            <td>${dataEntry.summary.passedTests}</td>
-                            <td>${dataEntry.summary.failedTests}</td>
-                            <td>${dataEntry.summary.totalTests}</td>
-                        </tr>
-                    </table>
+                    <p>Passed requests: <b>${dataEntry.summary.passedRequests}/${dataEntry.summary.totalRequests}</b></p>
+                    <p>Passed tests: <b>${dataEntry.summary.passedAssertions+dataEntry.summary.passedTests}/${dataEntry.summary.totalAssertions+dataEntry.summary.totalTests}</b></p>
                 `;
+
                 document.getElementById('daily_summary').appendChild(contentDiv);
 
                 const content = document.createElement('h3');                             
@@ -1375,37 +1537,22 @@
                     let totalTestAmount = result.testResults.length;
 
                     const content = document.createElement('p');                             
-                    content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${encodeURIComponent(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
+
+
+                    content.innerHTML = `<span id="request_result_sign_${resultIndex}" class="request_result_sign"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${encodeURIComponent(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
                     // content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${getDateTimeByEnvironment(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
                     document.getElementById('daily_summary').appendChild(content); 
 
-                    if (resultIndex == resultIndexQueryParam) {
-                        document.getElementById('daily_summary').appendChild(document.createElement('p')).innerText = `Runtime: ${Math.round(result.runtime * 1000)} ms`;
-                        document.getElementById('daily_summary').appendChild(document.createElement('p')).innerText = `Response time: ${result.response.responseTime} ms`;
-                    }
+
 
                     /* Assertion results */
 
-                    const assertionResultDiv = document.createElement('div');
-                    const assertionResultTable = document.createElement('table');
-
-                    const testResultDiv = document.createElement('div');
-                    const testResultTable = document.createElement('table');
 
                     for (let assertionResultIndex = 0; assertionResultIndex < result.assertionResults.length; assertionResultIndex++) {
                         const assertionResult = result.assertionResults[assertionResultIndex];
                         console.log(assertionResult);
                         if (assertionResult.status === 'pass') { 
                             passedAssertionAmount++; 
-                        }
-                        if (resultIndexQueryParam && resultIndexQueryParam == resultIndex) {
-                            assertionResultTable.innerHTML += `
-                                <tr>
-                                    <td>${getSignByResult(assertionResult.status)}</td>
-                                    <td>${assertionResult.status.toUpperCase()}</td>
-                                    <td>${assertionResult.lhsExpr} ${assertionResult.rhsExpr}</td>
-                                </tr>
-                            `;
                         }
                     }
 
@@ -1416,25 +1563,8 @@
                         if (testResult.status === 'pass') { 
                             passedTestAmount++; 
                         }
-                        if (resultIndexQueryParam && resultIndexQueryParam == resultIndex) {
-                            let errorMessage = "";
-                            if (testResult.error) {
-                                errorMessage = `, ERROR: "${testResult.error}"`;
-                            }
-                            testResultTable.innerHTML += `
-                                <tr>
-                                    <td>${getSignByResult(testResult.status)}</td>
-                                    <td>${testResult.status.toUpperCase()}</td>
-                                    <td>${testResult.description}${errorMessage}</td>
-                                </tr>
-                            `;
-                        }
                     }
 
-                    assertionResultDiv.appendChild(assertionResultTable);
-                    document.getElementById('daily_summary').appendChild(assertionResultDiv);     
-                    testResultDiv.appendChild(testResultTable);
-                    document.getElementById('daily_summary').appendChild(testResultDiv);
 
                     /* All assertions and tests passed */
                     console.log(passedAssertionAmount);

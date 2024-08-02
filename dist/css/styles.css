@@ -28,6 +28,14 @@ svg {
     height: 100%; /* SVG korkeus 100% #my_dataviz elementistä */
     /* border: 1px solid #0064AF; */
 }
+.request_result_sign {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+    vertical-align: top;
+    font-weight: bold;
+}
 .tick text {
     font-size: 14px; /* Muuta tämä halutun kokoiseksi */
 }
