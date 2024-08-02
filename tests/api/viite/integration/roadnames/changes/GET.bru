@@ -5,13 +5,14 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/integration/roadnames/changes?since={{since_var}}
+  url: {{baseUrl}}/api/viite/integration/roadnames/changes?since=1989-01-01
   body: none
   auth: none
 }
 
 params:query {
-  since: {{since_var}}
+  since: 1989-01-01
+  ~since: {{since_var}}
 }
 
 headers {

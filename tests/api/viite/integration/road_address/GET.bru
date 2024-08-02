@@ -5,14 +5,16 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/integration/road_address?municipality={{municipality_var}}
+  url: {{baseUrl}}/api/viite/integration/road_address?municipality=005
   body: none
   auth: none
 }
 
 params:query {
-  municipality: {{municipality_var}}
+  municipality: 005
+  ~municipality: {{municipality_var}}
   ~situationDate: {{situationDate_var}}
+  ~situationDate: 
 }
 
 headers {

@@ -5,12 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/search/road_address/{{road_var}}/
+  url: {{baseUrl}}/api/viite/search/road_address/1/?tracks=1
   body: none
   auth: none
 }
 
 params:query {
+  tracks: 1
   ~tracks: {{tracks_var}}
 }
 

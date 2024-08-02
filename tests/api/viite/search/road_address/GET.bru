@@ -5,15 +5,18 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/search/road_address/?linkId={{linkId_var}}
+  url: {{baseUrl}}/api/viite/search/road_address/?linkId=3e31f193-7084-448e-8a91-b93fd757784d:1
   body: none
   auth: none
 }
 
 params:query {
-  linkId: {{linkId_var}}
+  linkId: 3e31f193-7084-448e-8a91-b93fd757784d:1
+  ~linkId: {{linkId_var}}
   ~startMeasure: {{startMeasure_var}}
   ~endMeasure: {{endMeasure_var}}
+  ~startMeasure: 0
+  ~endMeasure: 1000
 }
 
 headers {
