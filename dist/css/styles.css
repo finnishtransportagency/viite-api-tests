@@ -17,6 +17,7 @@ body {
     top: 0;
     left: 0; */
     border: 1px solid #0064AF;
+    margin: 0 0 100px 0;
 }
 svg {
     position: absolute; /* Voi joutua muuttamaan relative arvoksi, jos kuvaajia on useampia kuin yksi.*/
@@ -26,6 +27,9 @@ svg {
     width: 100%; /* SVG leveydeksi 100% #my_dataviz elementistä */
     height: 100%; /* SVG korkeus 100% #my_dataviz elementistä */
     /* border: 1px solid #0064AF; */
+}
+.tick text {
+    font-size: 14px; /* Muuta tämä halutun kokoiseksi */
 }
 .tooltip, .environments_tooltip, .environment_requests_tooltip {
     font-family: Tahoma, Arial, sans-serif;
