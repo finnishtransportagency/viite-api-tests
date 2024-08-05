@@ -11,9 +11,9 @@
 </head>
 <body>
     <!-- <a href="./index.html"><img src="./src/vayla_sivussa_fi_sv_rgb.png" width="494" height="200"></a> -->
-    <p><a href="./index.html"><img src="./src/vayla_sivussa_fi_sv_rgb.png" width="20%" height="20%"></a></p>
+    <p><a href="./index.html"><img src="./src/vayla_sivussa_fi_sv_rgb.png" width="15%" height="15%"></a></p>
     <h1>Viite</h1>
-    <p><span id="front_page" class="content"><a href="./index.html">Front Page</a></span> <span id="back" class="content">| <a href="javascript:history.back()" id="back">Back</a></span></p>
+    <!-- <p><span id="front_page" class="content"><a href="./index.html">Front Page</a></span> <span id="back" class="content">| <a href="javascript:history.back()" id="back">Back</a></span></p> -->
     <h2 id="result_type"></h2>
     <!-- <h4 id="environment"></h4> -->
     <!-- <h4 id="time"></h4> -->
@@ -1323,14 +1323,19 @@
         }
 
         function addDailyResultInformation(timeValueQueryParam, environmentQueryParam) {
+
+            const header = document.createElement('h2');                             
+            header.innerText = `Test summary`;
+            document.getElementById('daily_result_information').appendChild(header);
+
             if (timeValueQueryParam && environmentQueryParam) {
                 const content = document.createElement('p');
-                content.innerText = `Test execution time: ${timeValueQueryParam}`;
+                content.innerHTML = `Test execution time: <b>${timeValueQueryParam}</b>`;
                 document.getElementById('daily_result_information').appendChild(content);
             }
             if (environmentQueryParam) {
                 const content = document.createElement('p');
-                content.innerText = `Test environment: ${environmentQueryParam}`;
+                content.innerHTML = `Test environment: <b>${environmentQueryParam}</b>`;
                 document.getElementById('daily_result_information').appendChild(content);
             }
 
@@ -1352,7 +1357,7 @@
             let totalTestAmount = result.testResults.length;
 
             const header = document.createElement('h2');
-            header.innerText = "Request"; 
+            header.innerText = "Test request"; 
             document.getElementById('daily_summary').appendChild(header); 
 
             const content = document.createElement('p');
@@ -1361,8 +1366,9 @@
             // content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${getDateTimeByEnvironment(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
             document.getElementById('daily_summary').appendChild(content); 
 
-            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerText = `Runtime: ${Math.round(result.runtime * 1000)} ms`;
-            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerText = `Response time: ${result.response.responseTime} ms`;
+            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerHTML = `Test execution time: <b>${timeValueQueryParam}</b>`;
+            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerHTML = `Runtime: <b>${Math.round(result.runtime * 1000)} ms</b>`;
+            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerHTML = `Response time: <b>${result.response.responseTime} ms</b>`;
 
             const headerTestResults = document.createElement('h2');
             headerTestResults.innerText = "Test Results"; 
@@ -1383,11 +1389,15 @@
                     passedAssertionAmount++; 
                 }
                 // if (resultIndexQueryParam && resultIndexQueryParam == resultIndex) {
+                    let errorMessage = "";
+                    if (assertionResult.error) {
+                        errorMessage = `, ERROR: "${assertionResult.error}"`;
+                    }
                     testResultTable.innerHTML += `
                         <tr>
                             <td><span class="request_result_sign">${getSignByResult(assertionResult.status)}</span></td>
                             <td>${assertionResult.status.toUpperCase()}</td>
-                            <td>${assertionResult.lhsExpr} ${assertionResult.rhsExpr}</td>
+                            <td>${assertionResult.lhsExpr} ${assertionResult.rhsExpr}${errorMessage}</td>
                         </tr>
                     `;
                 // }
@@ -1502,7 +1512,7 @@
             }
 
             const headerResponse = document.createElement('h2');
-            headerResponse.innerText = "Response"; 
+            headerResponse.innerText = "Response to Test Request"; 
             document.getElementById('daily_summary').appendChild(headerResponse); 
 
             const responseDiv = document.createElement('div');
@@ -1552,14 +1562,14 @@
 
                 const contentDiv = document.createElement('div');
                 contentDiv.innerHTML = `
-                    <p>Passed requests: <b>${dataEntry.summary.passedRequests}/${dataEntry.summary.totalRequests}</b></p>
+                    <p>Test requests: <b>${dataEntry.summary.totalRequests}</b></p>
                     <p>Passed tests: <b>${dataEntry.summary.passedAssertions+dataEntry.summary.passedTests}/${dataEntry.summary.totalAssertions+dataEntry.summary.totalTests}</b></p>
                 `;
 
                 document.getElementById('daily_summary').appendChild(contentDiv);
 
-                const content = document.createElement('h3');                             
-                content.innerText = `Requests`;
+                const content = document.createElement('h2');                             
+                content.innerText = `Test requests`;
                 document.getElementById('daily_summary').appendChild(content);
 
                 for (let resultIndex = 0; resultIndex < dataEntry.results.length; resultIndex++) {
