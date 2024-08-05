@@ -62,6 +62,9 @@ h1, h2, h3, h4, h5, h6 {
 .active {
     display: block;
 }
+.activeText {
+    display: inline-block;
+}
 .content {
     display: none;
 }
@@ -85,4 +88,25 @@ h1, h2, h3, h4, h5, h6 {
 .legend text {
     fill: black;
     font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    /* border: 1px solid black; */
+    /* padding: 8px; */
+    text-align: left;
+    vertical-align: top;
+}
+th {
+    background-color: #f2f2f2;
+}
+ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+li {
+    margin: 5px 0;
 }
