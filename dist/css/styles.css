@@ -5,6 +5,16 @@ body {
     margin: 10px 20px;
     /* margin: 0; */
 }
+#container {
+    display: flex;
+    padding: 0;
+}
+#environments_graph_legend1 {
+    width: 200px;
+    height: calc(100vh - 80px);
+    margin: 0;
+    border: 0;
+}
 #my_dataviz, #environments_dataviz, #environment_requests_dataviz {
     position: relative; 
     /* width: 100vw; */ /* 100% ikkunan leveydestä */
@@ -12,7 +22,7 @@ body {
     /* width: calc(100% - 40px); */ /* Tätä arvoa käytetty 29.7.2024 asti */
     /* height: 600px; */ /* Valitse sopiva korkeus */
     height: calc(100vh - 80px);
-    top: 40px;
+    /* top: 40px; */
     /* position: absolute;
     top: 0;
     left: 0; */

@@ -8,6 +8,37 @@
     <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="./css/vayla.css">
+    <style>
+            .chart-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .legend-container {
+                margin-top: 10px;
+            }
+            .legend-container1 {
+                display: inline-block;
+                width: 20%;
+                padding: 10px;
+                border: 1px solid #000;
+                margin: 5px;
+                box-sizing: border-box;
+            }
+            .legend-item {
+                display: inline-block;
+                margin-right: 10px;
+                cursor: pointer;
+            }
+            .legend-color {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                vertical-align: middle;
+            }
+    </style>
+
+    </style>
 </head>
 <body>
     <!-- <a href="./index.html"><img src="./src/vayla_sivussa_fi_sv_rgb.png" width="494" height="200"></a> -->
@@ -36,13 +67,21 @@
 
     <div id="environments_graph" class="content">
         <h2 id="result_type">Passed API Tests Over Time in All Environments</h2>
-        <div id="environments_dataviz"></div>
+        <div id="container">
+            <div id="environments_dataviz"></div>
+            <div id="environments_graph_legend1" class="legend-container1"></div>
+        </div>
+        <div id="environments_graph_legend" class="legend-container"></div>
         <!-- <div id="environments_tooltip" class="tooltip"></div> -->
     </div>
+
+    
+    
 
     <div id="environment_requests_graph" class="content">
         <h2 id="result_type">Response Times for API Test Requests Over Time in the Production Environment</h2>
         <div id="environment_requests_dataviz"></div>
+        <div id="environments_requests_legend" class="legend-container"></div>
         <!-- <div id="environment_requests_tooltip" class="tooltip"></div> -->
     </div>
 
@@ -56,9 +95,7 @@
         // Should this be inside main-function?
         const urlParams = new URLSearchParams(window.location.search);
         const environmentQueryParam = urlParams.get('environment');
-        console.log(environmentQueryParam);
         const timeValueQueryParam = urlParams.get('time');
-        console.log(timeValueQueryParam);
         const dataEntryIndexQueryParam = urlParams.get('dataEntryIndex');
         const resultIndexQueryParam = urlParams.get('resultIndex');
 
@@ -348,7 +385,8 @@
          *************
          *************/
 
-        function showGraph(data, dataReady, dataSeries, divContainerId, xLabel, yLabel, createCircles) {
+        function showGraph(data, dataReady, dataSeries, divContainerId, xLabel, yLabel, createCircles, legendContainer) {
+            console.log("legendContainer: " + legendContainer);
 
 
             // console.log("data:", data);
@@ -357,8 +395,10 @@
             // document.getElementById('result_type').innerText = "Graph";
 
             // set the dimensions and margins of the graph
-            const margin = {top: 50, right: 250, bottom: 50, left: 70};
-            let width = window.innerWidth - margin.left - margin.right - 40;
+            // const margin = {top: 50, right: 250, bottom: 50, left: 70};
+            const margin = {top: 50, right: 50, bottom: 50, left: 70};
+            // let width = window.innerWidth - margin.left - margin.right - 40;
+            let width = document.getElementById(divContainerId).clientWidth; - margin.left - margin.right - 40;
             let height = window.innerHeight - margin.top - margin.bottom - 80; 
         
 
@@ -787,13 +827,13 @@
             function createXAxis(scale) {       
 
                 const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Possible day intervals
-                let minDistance = 50; // Minimum pixel distance between ticks
+                let minDistance = 70; // Minimum pixel distance between ticks
 
                 let tickInterval = tickIntervals[0];
                 for (let i = 1; i < tickIntervals.length; i++) {
                     const interval = tickIntervals[i];
                     const ticks = scale.ticks(d3.timeDay.every(interval))
-                    minDistance = ticks.length + 50;
+                    minDistance = ticks.length + 70;
                     const avgTickDistance = width / ticks.length;
                     if (avgTickDistance >= minDistance) {
                         tickInterval = interval;
@@ -877,6 +917,11 @@
                 return setCircleVisibilityByDataEnv(d.name, visibility);
             }
 
+            function setCircleVisibilityByD2(d, visibility) {
+                const circles = svg.selectAll(`circle[data-name="${d.name}"]`);
+                circles.classed("hidden", visibility);
+            }
+
             function togglePathVisibilityByDataEnv(dataEnv) {
                 // const path = d3.select(`#${id}`);
                 const paths = svg.selectAll(`path[data-env="${dataEnv}"]`);
@@ -893,11 +938,24 @@
                 return togglePathVisibilityByDataEnv(d.name);
             }
 
+            function togglePathVisibilityByD2(d) {
+                const paths = svg.selectAll(`path.line[data-name="${d.name}"]`);
+                const isHidden = paths.classed("hidden");
+                paths.classed("hidden", !isHidden);
+                return !isHidden;
+            }
+
             function toggleLegendAndPathAndCircleVisibilityByD(d, self) {
                 const visibility = togglePathVisibilityByD(d); 
                 setCircleVisibilityByD(d, visibility);
                 d3.select(self).classed("dimmed", visibility)
                 // setLegendVisibilityByD(d, visibility);
+            }
+
+            function toggleLegendAndPathAndCircleVisibilityByD2(d, self) {
+                const visibility = togglePathVisibilityByD2(d); 
+                setCircleVisibilityByD2(d, visibility);
+                d3.select(self).classed("dimmed", visibility);
             }
 
             // Toggle visibility function
@@ -918,6 +976,7 @@
             }
 
             // Add a legends
+            /*
             const legend = svg.selectAll("myLegends")
                 .data(dataReady)
                 .enter()
@@ -930,8 +989,33 @@
                         // toggleLegendDimming(event, d, this); // OPTION 1
                         // togglePathAndCircleVisibility(d.name); // OPTION 1
                     });
+            */
+            
+            const environments_graph_legend = d3.select(`#${legendContainer}`);
+
+            dataReady.forEach((d, i) => {
+                const legendItem = environments_graph_legend.append("div")
+                    .datum(d)
+                    .attr("class", "legend")
+                    .attr("data-env", d.name)
+                    .on("click", function(event) {
+                        const data = d3.select(this).datum();
+                        toggleLegendAndPathAndCircleVisibilityByD(data, this); // OPTION 2
+                        // toggleLegendDimming(event, d, this); // OPTION 1
+                        // togglePathAndCircleVisibility(d.name); // OPTION 1
+                    });
+
+                legendItem.append("div")
+                    .attr("class", "legend-color")
+                    .style("background-color", myColor(d.name));
+
+                legendItem.append("span")
+                    .html(" <b>" + d.name + "</b>");
+                    // .text(" " + d.name);
+            });
 
 
+            /*
             legend.append("rect")
                 .attr("x", 0)
                 .attr("width", 18)
@@ -950,6 +1034,7 @@
                 // .on("click", (event, d) => {
                     // togglePathAndCircleVisibility(d.name);
                 // });
+            */
 
 
 
@@ -1013,6 +1098,7 @@
             ************************/
 
             // Function to update legend position
+            /*
             function updateLegendPosition() {
                 const legendSpacing = 20;
                 const legendWidth = 100;
@@ -1038,7 +1124,7 @@
                     .attr("x", 0)
                     .attr("width", 18)
                     .attr("height", 18)
-                    .style("fill", d => myColor(d.name))
+                    .style("fill", d => myColor(d.name));
                     // .on("click", (event, d) => {
                         // togglePathAndCircleVisibility(d.name);
                     // });
@@ -1071,6 +1157,29 @@
                     .text(yLabel);
                     // .text(Object.keys(dataReady[0].values[0])[1].toUpperCase());
             }
+            */
+
+            function updateAxisLabelPosition() {
+                xAxisLabel.remove();
+                
+                xAxisLabel = svg.append("text")
+                    .attr("transform", `translate(${width / 2},${height + margin.bottom - 10})`)
+                    .style("text-anchor", "middle")
+                    .text(xLabel);
+                    // .text(Object.keys(dataReady[0].values[0])[0].toUpperCase());
+
+                yAxisLabel.remove();
+
+                yAxisLabel = svg.append("text")
+                    .attr("transform", `rotate(-90)`)
+                    .attr("y", 0 - margin.left + 20)
+                    .attr("x", 0 - (height / 2))
+                    .style("text-anchor", "middle")
+                    .text(yLabel);
+                    // .text(Object.keys(dataReady[0].values[0])[1].toUpperCase());
+            }
+
+
 
             /**************************
             ***************************
@@ -1104,7 +1213,8 @@
             }, { passive: false });
 
             window.addEventListener("resize", () => {
-                width = window.innerWidth - margin.left - margin.right - 40;
+                // width = window.innerWidth - margin.left - margin.right - 40;
+                width = document.getElementById(divContainerId).clientWidth; - margin.left - margin.right - 40;
                 height = window.innerHeight - margin.top - margin.bottom - 80;
 
                 x.range([0, width]);
@@ -1155,16 +1265,19 @@
                 }
 
                 // Remove and update legend
-                svg.selectAll(".legend").remove(); // Remove existing legends
+
+                // svg.selectAll(".legend").remove(); // Remove existing legends
             
                 // Update legend position
-                updateLegendPosition();
+                // updateLegendPosition();
+                updateAxisLabelPosition();
 
             });
 
             // Tarvitaanko?
             // Initialize legend position
             // updateLegendPosition();
+            updateAxisLabelPosition();
             
             // ALIOHJELMA PÄÄTTYY
         }
@@ -1207,7 +1320,7 @@
             console.log("parsedData (showEnvironmentsGraph):", parsedData);
             console.log("dataReady (showEnvironmentsGraph):", dataReady);
 
-            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Passed Tests [pcs]", true);
+            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Passed Tests [pcs]", true, "environments_graph_legend1");
         }
 
         function showEnvironmentRequestsGraph(data, divContainerId) {
@@ -1246,6 +1359,7 @@
             });
             */
 
+            
             const dataSeries = [
                 "GET https://devapi.testivaylapilvi.fi/viite/api/viite/changes/road_numbers?since={{since_var}}&until={{until_var}}", 
                 "GET https://devapi.testivaylapilvi.fi/viite/api/viite/integration/linear_location/changes?since={{since_var}}", 
@@ -1282,7 +1396,7 @@
             console.log("parsedData (showEnvironmentRequestsGraph):", parsedData);
             console.log("dataReady (showEnvironmentRequestsGraph):", dataReady);
             
-            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Response Time [ms]", false);
+            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Response Time [ms]", false, "environments_requests_legend");
         }
 
         function reminder() {
