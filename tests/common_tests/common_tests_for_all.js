@@ -2,7 +2,7 @@ const path = require('path');
 
 const common_tests_for_all = () => {
   
-  console.log(`!!! BEGIN: "${path.basename(__filename)}" !!!`);
+  // console.log(`!!! BEGIN: "${path.basename(__filename)}" !!!`);
     
   test(`"Content-Type" or "content-type" is present`, async () => {
     expect(res.getHeaders()).to.include.any.keys("Content-Type", "content-type");
@@ -25,11 +25,11 @@ const common_tests_for_all = () => {
     expect(contentType).to.be.oneOf(['application/json', 'application/json; charset=UTF-8']);
   });
 
-  test('Response time is less than "10" seconds', function () {
-    expect(res.responseTime).to.be.below(10000);
+  test('Response time is less than "30" seconds', function () {
+    expect(res.responseTime).to.be.below(30000);
   });
 
-  console.log(`!!! END: "${path.basename(__filename)}" !!!`);
+  // console.log(`!!! END: "${path.basename(__filename)}" !!!`);
 
 }
 

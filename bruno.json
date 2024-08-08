@@ -5,8 +5,10 @@
   "ignore": [
     ".git", 
     "bin", 
+    "dist",
     "lib", 
-    "node_modules"
+    "node_modules", 
+    "src"
   ], 
   "scripts": {
     "moduleWhitelist": ["fs", "child_process"],

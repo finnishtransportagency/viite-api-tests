@@ -18,7 +18,7 @@ const common_schema_test_for_response_data_and_schema = (data, schema) => {
     try {
       validationResult = ajv.validate(schema, data);
       if (!validationResult) {
-        console.log('Errors:', ajv.errors);
+        console.error('Schema errors:', ajv.errors);
       }
     } 
     catch (error) {
@@ -52,7 +52,7 @@ const common_schema_test_for_all = (data, path_schema, file_schema) => {
     try {
       validationResult = ajv.validate(schema, data);
       if (!validationResult) {
-        console.log('Errors:', ajv.errors);
+        console.error('Schema errors:', ajv.errors);
       }
     } 
     catch (error) {

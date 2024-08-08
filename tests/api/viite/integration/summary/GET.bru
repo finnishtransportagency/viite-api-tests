@@ -41,5 +41,47 @@ tests {
   common_schema_test_for_response_data_and_schema_js_file(data, './tests/api/viite/integration/summary', 'schema_for_valid_credentials.js'); 
   common_tests_for_all(); 
   common_tests_for_valid_credentials();
+
+  const check_track_lengths = (data) => {
+    const mismatchedRoads = [];
+  
+    for (const road of data) {
+      let track_1_total_length = 0;
+      let track_2_total_length = 0;
+  
+      for (const roadpart of road.roadparts) {
+        for (const track of roadpart.tracks) {
+          const length = track.endaddressM - track.startaddressM;
+  
+          if (track.track === 1) {
+            track_1_total_length += length;
+          } else if (track.track === 2) {
+            track_2_total_length += length;
+          }
+        }
+      }
+  
+      if (track_1_total_length !== track_2_total_length) {
+        mismatchedRoads.push(`Roadnumber ${road.roadnumber}: Track 1 total length is ${track_1_total_length}, Track 2 total length is ${track_2_total_length}`);
+      }
+    }
+  
+    if (mismatchedRoads.length > 0) {
+      return {
+        success: false,
+        message: mismatchedRoads.join('\n')
+      };
+    } else {
+      return {
+        success: true,
+        message: 'All track lengths match.'
+      };
+    }
+  };
+
+  test('Tracks 1 and 2 are of equal length', async () => {
+    const result = check_track_lengths(data);
+    assert.equal(result.success, true, result.message);
+  });
   
 }
