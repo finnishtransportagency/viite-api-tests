@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viite | API test results</title>
+    <title>Viite | API Test Results</title>
     <script src="./src/d3.v7.min.js"></script>
     <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="./css/vayla.css">
     <style>
+            /* IS THIS NEEDED ? */
             .chart-container {
                 display: flex;
                 flex-direction: column;
@@ -17,14 +18,7 @@
             .legend-container {
                 margin-top: 10px;
             }
-            .legend-container1 {
-                display: inline-block;
-                width: 20%;
-                padding: 10px;
-                border: 1px solid #000;
-                margin: 5px;
-                box-sizing: border-box;
-            }
+
             .legend-item {
                 display: inline-block;
                 margin-right: 10px;
@@ -37,17 +31,17 @@
                 vertical-align: middle;
             }
     </style>
-
-    </style>
 </head>
+
 <body>
-    <!-- <a href="./index.html"><img src="./src/vayla_sivussa_fi_sv_rgb.png" width="494" height="200"></a> -->
+
     <p><a href="./index.html"><img src="./src/vayla_sivussa_fi_sv_rgb.png" width="15%" height="15%"></a></p>
+    
     <h1>Viite</h1>
+    
     <!-- <p><span id="front_page" class="content"><a href="./index.html">Front Page</a></span> <span id="back" class="content">| <a href="javascript:history.back()" id="back">Back</a></span></p> -->
-    <h2 id="result_type"></h2>
-    <!-- <h4 id="environment"></h4> -->
-    <!-- <h4 id="time"></h4> -->
+    
+    <h2 id="result_type"></h2> <!-- IS THIS NEEDED ? -->
 
     <div id="daily_result_information" class="content"></div>
 
@@ -56,74 +50,62 @@
     <div id="daily_summary" class="content">
         <!-- <h2 id="daily_summary_header">Daily Summary</h2> -->
     </div>
-    
-    <!--
-    <div id="graph" class="content">
-        <h2 id="result_type">Graph</h2>
-        <div id="my_dataviz"></div>
-        <div id="tooltip" class="tooltip"></div>
-    </div>
-    -->
 
-    <div id="environments_graph" class="content">
-        <h2 id="result_type">Passed API Tests Over Time in All Environments</h2>
-        <div id="container">
-            <div id="environments_dataviz"></div>
-            <div id="environments_graph_legend1" class="legend-container1"></div>
+    <div id="passed_tests_graph_container" class="content">
+        <h2>Passed API Tests Over Time in All Environments</h2>
+        <div id="passed_tests_graph_dataviz_and_legend">
+            <div id="passed_tests_graph_dataviz"></div>
+            <div id="passed_tests_graph_legends" class="passed_tests_graph_legends"></div>
         </div>
-        <div id="environments_graph_legend" class="legend-container"></div>
+        <!-- <div id="environments_graph_legend" class="legend-container"></div> -->
         <!-- <div id="environments_tooltip" class="tooltip"></div> -->
     </div>
 
-    
-    
-
-    <div id="environment_requests_graph" class="content">
-        <h2 id="result_type">Response Times for API Test Requests Over Time in the Production Environment</h2>
-        <div id="environment_requests_dataviz"></div>
-        <div id="environments_requests_legend" class="legend-container"></div>
+    <div id="response_times_graph_container" class="content">
+        <h2>Response Times for API Test Requests Over Time in the Production Environment</h2>
+        <div id="response_times_graph_dataviz"></div>
+        <div id="response_times_graph_legends" class="response_times_graph_legends"></div>
         <!-- <div id="environment_requests_tooltip" class="tooltip"></div> -->
     </div>
 
+    <!-- TS 7.8.2024: Checked -->
     <div id="tooltip" class="tooltip"></div>
 
     
 
     <script>
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         // Should this be inside main-function?
         const urlParams = new URLSearchParams(window.location.search);
         const environmentQueryParam = urlParams.get('environment');
-        const timeValueQueryParam = urlParams.get('time');
+        const timeQueryParam = urlParams.get('time');
         const dataEntryIndexQueryParam = urlParams.get('dataEntryIndex');
         const resultIndexQueryParam = urlParams.get('resultIndex');
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         document.addEventListener('DOMContentLoaded', () => {
             main();
         });
 
-        /********
-         ********
-         * main *
-         ********
-         ********/
+        /*******
+        ********
+        * main *
+        ********
+        *******/
 
         async function main() {
 
             const baseURL = getBaseURL();
 
             // TS 29.7.2024: Checked
-            // Remove commented code lines if app works
-            // document.getElementById('graph').classList.remove('active');
-            document.getElementById('environments_graph').classList.remove('active');
-            document.getElementById('environment_requests_graph').classList.remove('active');
+            document.getElementById('passed_tests_graph_container').classList.remove('active');
+            document.getElementById('response_times_graph_container').classList.remove('active');
             document.getElementById('daily_result_information').classList.remove('active');
             document.getElementById('daily_summary').classList.remove('active');
             document.getElementById('daily_results').classList.remove('active');
 
-            if (timeValueQueryParam && environmentQueryParam && dataEntryIndexQueryParam && resultIndexQueryParam) {
+            if (timeQueryParam && environmentQueryParam && dataEntryIndexQueryParam && resultIndexQueryParam) {
                 setElementVisibleByElementId("daily_result_information");
                 setElementVisibleByElementId("daily_summary");
                 setTextVisibleByElementId("front_page");
@@ -134,8 +116,8 @@
                 // document.getElementById('daily_summary').classList.add('active');
                 // fetchDataAndShowDailySummary();
 
-                // const url = `${baseURL}${timeValueQueryParam}/results-${environmentQueryParam}.json`;
-                const url = `${baseURL}${getDateTimeByEnvironment(timeValueQueryParam)}/results-${environmentQueryParam}.json`;
+                // const url = `${baseURL}${timeQueryParam}/results-${environmentQueryParam}.json`;
+                const url = `${baseURL}${getDateTimeByEnvironment(timeQueryParam)}/results-${environmentQueryParam}.json`;
                 fetchDataAndHandleErrors(url, "my_dataviz", showDailyResults);
 
                 /*
@@ -149,7 +131,7 @@
                 */
 
             }
-            else if (timeValueQueryParam && environmentQueryParam && resultIndexQueryParam) {
+            else if (timeQueryParam && environmentQueryParam && resultIndexQueryParam) {
                 setElementVisibleByElementId("daily_result_information");
                 setElementVisibleByElementId("daily_summary");
                 setTextVisibleByElementId("front_page");
@@ -159,7 +141,7 @@
                 // document.getElementById('daily_summary').classList.remove('content');
                 // document.getElementById('daily_summary').classList.add('active');
                 // fetchDataAndShowDailySummary();
-                const url = `${baseURL}${getDateTimeByEnvironment(timeValueQueryParam)}/results-${environmentQueryParam}.json`;
+                const url = `${baseURL}${getDateTimeByEnvironment(timeQueryParam)}/results-${environmentQueryParam}.json`;
                 fetchDataAndHandleErrors(url, "my_dataviz", showDailyResults);
 
                 /*
@@ -173,7 +155,7 @@
                 */
 
             }
-            else if (timeValueQueryParam && environmentQueryParam) {
+            else if (timeQueryParam && environmentQueryParam) {
                 setElementVisibleByElementId("daily_result_information");
                 setElementVisibleByElementId("daily_summary");
                 setTextVisibleByElementId("front_page");
@@ -184,7 +166,7 @@
                 // document.getElementById('daily_summary').classList.add('active');
                 // fetchDataAndShowDailySummary();
 
-                const url = `${baseURL}${getDateTimeByEnvironment(timeValueQueryParam)}/results-${environmentQueryParam}.json`;
+                const url = `${baseURL}${getDateTimeByEnvironment(timeQueryParam)}/results-${environmentQueryParam}.json`;
                 fetchDataAndHandleErrors(url, "my_dataviz", showDailySummary);
 
                 /*
@@ -199,41 +181,21 @@
 
             }
             else {
-                // setElementVisibleByElementId("graph");
-                setElementVisibleByElementId("environments_graph");
-                setElementVisibleByElementId("environment_requests_graph");
                 
-                // document.getElementById('graph').classList.remove('content');
-                // document.getElementById('graph').classList.add('active');
-                // fetchDataAndShowGraph();
+                // TS 7.8.2024: Checked
 
-                // const url = `${baseURL}summary.json`;
-                // fetchDataAndHandleErrors(url, "my_dataviz", showGraph);
+                setElementVisibleByElementId("passed_tests_graph_container");
+                setElementVisibleByElementId("response_times_graph_container");
 
-                const environments_url = `${baseURL}data/summary.json`;
-                fetchDataAndHandleErrors(environments_url, "environments_dataviz", showEnvironmentsGraph);
+                const passed_tests_url = `${baseURL}data/summary.json`;
+                fetchDataAndHandleErrors(passed_tests_url, "passed_tests_graph_dataviz", showPassedTestsGraph);
 
-                // const environment_requests_url = `${baseURL}${getDateTimeByEnvironment(timeValueQueryParam)}/response_time-prod.json`;
-                // const environment_requests_url = `${baseURL}${timeValueQueryParam}/response_time-prod.json`;
-                const environment_requests_url = `${baseURL}data/responseTimes.json`;
-                // const environment_requests_url = `${baseURL}data/responseTimes.json`;
-                fetchDataAndHandleErrors(environment_requests_url, "environment_requests_dataviz", showEnvironmentRequestsGraph);
-                console.log(environment_requests_url);
-
-                /*
-                try {
-                    const data = await fetchData(url);
-                    showGraph(data);
-                }
-                catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-                */
-
+                const response_times_url = `${baseURL}data/responseTimes.json`;
+                fetchDataAndHandleErrors(response_times_url, "response_times_graph_dataviz", showResponseTimesGraph);
             }
         }
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         function setElementVisibleByElementId(elementId) {
             const element = document.getElementById(elementId);
             if (element) {
@@ -242,6 +204,7 @@
             }
         }
 
+        // TS 7.8.2024: Checked
         function setTextVisibleByElementId(elementId) {
             const element = document.getElementById(elementId);
             if (element) {
@@ -250,12 +213,12 @@
             }
         }
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         function isLocal() {
             return window.location.protocol === 'file:';
         }
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         // Determine base URL based on environment
         function getBaseURL() {
             if ( isLocal() ) {
@@ -265,17 +228,17 @@
             }
         }
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         function gotoLoginPage() {
             if ( isLocal() ) {
-                window.location.href = "https://viiteapitest.testivaylapilvi.fi/oauth2/";
+                window.location.href = "https://viiteapitest.testivaylapilvi.fi/oauth2/"; // Never used. Can be tested when having "404 error".
                 return;
             }
-            window.location.href = "./oauth2/"; // USE THIS ON THE SERVER
+            window.location.href = "./oauth2/"; // Production environment URL
             return; 
         }
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         async function fetchDataAndHandleErrors(url, divContainerId, callback) {
             try {
                 const data = await fetchData(url);
@@ -289,26 +252,16 @@
             }
         }
 
-        // TS 29.7.2024: Checked
+        // TS 7.8.2024: Checked
         function fetchData(url) {
-
             return fetch(url) // TOIMII
             .then(response => {
                 if (!response.ok) {
-                    // console.log(response);
                     console.log(response.status);
                     switch(response.status) {
                         case 403: 
                             gotoLoginPage();
                             return; 
-                            /*
-                            if ( isLocal() ) {
-                                window.location.href = "https://viiteapitest.testivaylapilvi.fi/oauth2/";
-                                return
-                            }
-                            window.location.href = "./oauth2/"; // USE THIS ON THE SERVER
-                            return; 
-                            */
                         case 404:
                             // gotoLoginPage();
                             // return;
@@ -332,7 +285,6 @@
                     console.error('Unknown error occurred: ', error);
                 }
             });
-
         }
 
         function getDateTimeByEnvironment(date) {
@@ -379,18 +331,13 @@
             return `${year}-${month}-${day}T${hours}-${minutes}-${seconds}%2B${offset_hours}-${offset_minutes}`;
         }
 
-        /*************
-         *************
-         * showGraph *
-         *************
-         *************/
+        /************
+        *************
+        * showGraph *
+        *************
+        ************/
 
-        function showGraph(data, dataReady, dataSeries, divContainerId, xLabel, yLabel, createCircles, legendContainer) {
-            console.log("legendContainer: " + legendContainer);
-
-
-            // console.log("data:", data);
-            // console.log("dataReady:", dataReady);
+        function showGraph(data, dataReady, dataSeries, divContainerId, xLabel, yLabel, createCircles, legendContainer, id) {
 
             // document.getElementById('result_type').innerText = "Graph";
 
@@ -398,11 +345,9 @@
             // const margin = {top: 50, right: 250, bottom: 50, left: 70};
             const margin = {top: 50, right: 50, bottom: 50, left: 70};
             // let width = window.innerWidth - margin.left - margin.right - 40;
-            let width = document.getElementById(divContainerId).clientWidth; - margin.left - margin.right - 40;
+            let width = document.getElementById(divContainerId).clientWidth - margin.left - margin.right;
             let height = window.innerHeight - margin.top - margin.bottom - 80; 
         
-
-            
             let isMouseOverSvg = false;
             let isMouseOverCircle = false;
 
@@ -410,7 +355,8 @@
             const zoom = d3.zoom()
                 .scaleExtent([1, 500]) // min and max zoom
                 // .translateExtent([[0, 0], [width, height]])
-                .wheelDelta(function(event) { return -event.deltaY * 0.01; })
+                // .translateExtent([[0, 0], [width, height]])
+                // .wheelDelta(function(event) { return -event.deltaY * 0.01; }) 
                 .filter( event => {
                     return event.ctrlKey; // Zoom only when Ctrl key is pressed
                     // return event.ctrlKey && event.button === 0;
@@ -432,13 +378,11 @@
                 .on("mouseenter", event => { 
                     isMouseOverSvg = true;
                     event.preventDefault();
-                    printDebugMessages();
                 })
                 .on("mouseleave", () => { 
                     isMouseOverSvg = false;
-                    printDebugMessages();
                 })
-                // .call(zoom);
+                .call(zoom);
 
             const rect = svg.append("rect")
                 .attr("width", width)
@@ -449,14 +393,6 @@
                 .call(zoom);
 
 
-
-
-
-            // ALIOHJELMA ALKAA
-
-            // Parse the date / time
-            // const parseDate = d3.timeParse("%Y-%m-%d");
-            // const parseDate = d3.timeParse("%Y-%m-%dT%H:%M:%S%Z");
             const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
             const formatDate = d3.utcFormat("%Y-%m-%dT%H:%M:%S%Z");
 
@@ -533,13 +469,8 @@
             // Check that the data is ready
             // console.log(dataReady);
 
-            // const allEnvironments = ["prod", "qa", "dev"];
-            // A color scale: one color for each group
             const myColor = d3.scaleOrdinal()
-                // .domain(allEnvironments)
                 .domain(dataSeries)
-                // .range(d3.schemeSet2);
-                // .range(["#0064AF", "#0099FF", "#49C2F1"]);
                 .range(["#0064AF", "#0099FF", "#49C2F1", "#00B0CC", "#207A43", "#8DCB6D", "#FFC300", "#910AA3", "#C73F00", "#FF5100", "#E50083"]); // Customer's colors are being used
 
             // Generate unique tick values for the initial state
@@ -551,6 +482,8 @@
             // const x = d3.scaleUtc()
                 .domain(d3.extent(data, d => new Date(d.date)))
                 .range([ 0, width ]);
+            
+            const temp = d3.extent(data, d => new Date(d.date)); 
 
             const xAxis = d3.axisBottom(x);
 
@@ -624,8 +557,8 @@
 
             // Add the lines
             const line = d3.line()
-                .x(d => x(+(new Date(d.date))))
-                .y(d => y(+d.value));
+                .x(d => x(new Date(d.date)))
+                .y(d => y(d.value));
 
             /*
             svg.selectAll("myLines")
@@ -637,47 +570,10 @@
                     .style("fill", "none")
             */
 
-            // Moved elsewhere
-            /*
-            // Define zoom behavior
-            const zoom = d3.zoom()
-                .scaleExtent([0.5, 1000]) // min and max zoom
-                .extent([[0, 0], [width, height]])
-                .filter( event => {
-                    return event.ctrlKey; // Zoom only when Ctrl key is pressed
-                    // return event.ctrlKey && event.button === 0;
-                    // return (event.ctrlKey || event.type === 'wheel') || (event.ctrlKey && event.button === 1);
-                })
-                .on("zoom", event => {
-                    if (isMouseOverSvg && event.sourceEvent) {
-                        updateChart(event);
-                    }
-                });
-            */
-
-            // Moved elsewhere
-            /*
-            svg.on("mouseenter", event => { 
-                isMouseOverSvg = true;
-                event.preventDefault();
-                printDebugMessages();
-            });
-            */
-
-            // Moved elsewhere
-            /*
-            svg.on("mouseleave", () => { 
-                isMouseOverSvg = false;
-                printDebugMessages();
-            });
-            */
-
-            // svg.call(zoom);
-
             // Add a clipPath: everything out of this area won't be drawn.
             const clip = svg.append("defs")
                 .append("svg:clipPath")
-                .attr("id", "clip")
+                .attr("id", `clip_${id}`)
                 .append("svg:rect")
                 .attr("width", width )
                 .attr("height", height )
@@ -711,7 +607,7 @@
 
             // Create the scatter variable: where both the circles and the brush take place
             const scatter = svg.append('g')
-                .attr("clip-path", "url(#clip)")
+                .attr("clip-path", `url(#clip_${id})`)
 
             // Add lines
             scatter
@@ -820,11 +716,104 @@
 
 
 
-            /*******************
-             * Other functions *
-             *******************/
+            /******************
+            * Other functions *
+            ******************/
 
-            function createXAxis(scale) {       
+            function createXAxis(scale) {
+                const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Mahdolliset päiväintervallit
+                let tickInterval = tickIntervals[0]; // Alkuarvo
+
+                // Etsitään sopiva päiväintervalli
+                for (let i = 0; i < tickIntervals.length; i++) {
+                    const interval = tickIntervals[i];
+                    const ticks = generateTickValues(scale.domain()[0], scale.domain()[1], interval);
+                    const avgTickDistance = width / ticks.length;
+                    const minDistance = 100; // Pienin pikselietäisyys tikkejen välillä
+
+                    if (avgTickDistance >= minDistance) {
+                        tickInterval = interval;
+                        break;
+                    }
+                }
+
+                // Luo manuaalisesti tasaväliset tick-arvot
+                const tickValues = generateTickValues(scale.domain()[0], scale.domain()[1], tickInterval);
+
+                return d3.axisBottom(scale)
+                    .tickValues(tickValues)
+                    .tickFormat(d3.timeFormat("%Y-%m-%d"));
+            }
+
+            // Funktio tikkiarvojen generoimiseksi manuaalisesti
+            function generateTickValues(startDate, endDate, interval) {
+                const tickValues = [];
+                let currentDate = new Date(startDate);
+                currentDate.setHours(0, 0, 0, 0); // Nollataan kellonaika
+
+                // Varmistetaan, että tikit alkavat `startDate`-päivämäärästä ja päättyvät `endDate`-päivämäärään
+                while (currentDate <= endDate) {
+                    if (currentDate >= startDate) {
+                        tickValues.push(new Date(currentDate));
+                    }
+                    currentDate.setDate(currentDate.getDate() + Math.round(interval)); // Pyöristetään interval oikeaksi
+                }
+
+                // Poista tikit, jotka ovat ennen x-akselin alkuarvoa
+                return tickValues.filter(date => date >= startDate);
+            }
+
+
+
+
+            /*
+            function createXAxis(scale) {
+                const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Mahdolliset päiväintervallit
+                let tickInterval = tickIntervals[0]; // Alkuarvo
+
+                // Etsitään sopiva päiväintervalli
+                for (let i = 0; i < tickIntervals.length; i++) {
+                    const interval = tickIntervals[i];
+                    const ticks = generateTickValues(scale.domain()[0], scale.domain()[1], interval);
+                    const avgTickDistance = width / ticks.length;
+                    const minDistance = 100; // Pienin pikselietäisyys tikkejen välillä
+
+                    if (avgTickDistance >= minDistance) {
+                        tickInterval = interval;
+                        break;
+                    }
+                }
+
+                // Luo manuaalisesti tasaväliset tick-arvot
+                const tickValues = generateTickValues(scale.domain()[0], scale.domain()[1], tickInterval);
+
+                return d3.axisBottom(scale)
+                    .tickValues(tickValues)
+                    .tickFormat(d3.timeFormat("%Y-%m-%d"));
+            }
+
+            // Funktio tikkiarvojen generoimiseksi manuaalisesti
+            function generateTickValues(startDate, endDate, interval) {
+                const tickValues = [];
+                let currentDate = new Date(startDate);
+                currentDate.setHours(0, 0, 0, 0); // Nollataan kellonaika
+
+                // Varmistetaan, että tikit alkavat `startDate`-päivämäärästä ja päättyvät `endDate`-päivämäärään
+                while (currentDate <= endDate) {
+                    if (currentDate >= startDate) {
+                        tickValues.push(new Date(currentDate));
+                    }
+                    currentDate.setDate(currentDate.getDate() + Math.round(interval)); // Pyöristetään interval oikeaksi
+                }
+
+                // Poista tikit, jotka ovat ennen x-akselin alkuarvoa
+                return tickValues.filter(date => date >= startDate);
+            }
+            */
+            
+
+
+            function createXAxis2(scale) {       
 
                 const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Possible day intervals
                 let minDistance = 70; // Minimum pixel distance between ticks
@@ -843,9 +832,15 @@
 
                 // xAxis.call(d3.axisBottom(x).ticks(d3.timeDay.every(tickInterval)));
 
+                /*
                 return d3.axisBottom(scale)
-                    . ticks(d3.timeDay.every(tickInterval))
+                    .ticks(d3.timeDay.every(tickInterval))
                     // .tickValues(tickValues)
+                    .tickFormat(d3.timeFormat("%Y-%m-%d"));
+                */
+
+                return d3.axisBottom(scale)
+                    .tickValues(tickValues)
                     .tickFormat(d3.timeFormat("%Y-%m-%d"));
 
 
@@ -877,12 +872,6 @@
                 return d3.axisLeft(scale)
                     .ticks(tickCount)
                     .tickFormat(d3.format("d"));
-            }
-
-            // Debug messages
-            function printDebugMessages() {
-                console.log(`isMouseOverSvg: ${isMouseOverSvg}`);
-                console.log("*****")
             }
 
             function isPathHiddenByDataEnv(dataEnv) {
@@ -1074,10 +1063,10 @@
                 gy.call(createYAxis(newY));
 
                 scatter
-                    .selectAll("path")
+                    .selectAll("path.path")
                     .attr("d", d => d3.line()
-                        .x(d => newX(+(new Date(d.date))))
-                        .y(d => newY(+d.value))(d.values)
+                        .x(d => newX(new Date(d.date)))
+                        .y(d => newY(d.value))(d.values)
                     );
 
                 // update circles
@@ -1202,11 +1191,9 @@
                 }
             });
 
-            // DOES NOT WORK, IF CTRL IS BEING PRESSED
-            // WORKS ONLY WHEN WHEEL IS BEING USED
+
             // Prevent default scroll behavior when Ctrl key is pressed
             window.addEventListener('wheel', event => {
-                // if (event.ctrlKey && isMouseOverSvg && (isMouseOverCircle || svg.node().contains(event.target))) {
                 if (event.ctrlKey && isMouseOverSvg) {
                     event.preventDefault();
                 }
@@ -1214,7 +1201,7 @@
 
             window.addEventListener("resize", () => {
                 // width = window.innerWidth - margin.left - margin.right - 40;
-                width = document.getElementById(divContainerId).clientWidth; - margin.left - margin.right - 40;
+                width = document.getElementById(divContainerId).clientWidth - margin.left - margin.right;
                 height = window.innerHeight - margin.top - margin.bottom - 80;
 
                 x.range([0, width]);
@@ -1226,21 +1213,21 @@
 
                 gy.call(createYAxis(y));
 
-                svg
+                const svgElement = d3.select(`#${divContainerId} svg`)
                     .attr('width', width + margin.left + margin.right)
                     .attr('height', height + margin.top + margin.bottom);
 
-                svg.select('#clip rect')
+                svgElement.select(`#clip_${id} rect`)
                     .attr('width', width)
                     .attr('height', height);
 
                     // .translateExtent([[0, 0], [width, height]]);
 
-                /*
+                
                 rect
                     .attr("width", width)
                     .attr("height", height);
-                */
+                
               
 
 
@@ -1279,28 +1266,25 @@
             // updateLegendPosition();
             updateAxisLabelPosition();
             
-            // ALIOHJELMA PÄÄTTYY
         }
 
-        function showEnvironmentsGraph(data, divContainerId) {
+        // TS 7.8.2024: PARTIALLY CHECKED
+        function showPassedTestsGraph(data, divContainerId) {
 
-            console.log("data (showEnvironmentsGraph):", data);
-
-            const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
+            // const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
 
             const parsedData = [];
             for (let key in data) {
                 if (data.hasOwnProperty(key)) {
                     parsedData.push({
-                        date: key.replace(/\//g, ""), // Säilytetään alkuperäinen päivämäärämerkkijono
+                        date: key.replace(/\//g, ""),
                         dev: data[key].dev,
                         qa: data[key].qa,
                         prod: data[key].prod
                     });
                 }
             }
-            
-            // sorts parsedData by date and time in ascending order
+
             parsedData.sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
@@ -1317,15 +1301,10 @@
                 };
             });
 
-            console.log("parsedData (showEnvironmentsGraph):", parsedData);
-            console.log("dataReady (showEnvironmentsGraph):", dataReady);
-
-            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Passed Tests [pcs]", true, "environments_graph_legend1");
+            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Date", "Passed Tests [pcs]", true, "passed_tests_graph_legends", 1);
         }
 
-        function showEnvironmentRequestsGraph(data, divContainerId) {
-
-            console.log("data (showEnvironmentRequestsGraph):", data);
+        function showResponseTimesGraph(data, divContainerId) {
 
             // const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
             const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%SZ");
@@ -1393,10 +1372,7 @@
             });
             */
             
-            console.log("parsedData (showEnvironmentRequestsGraph):", parsedData);
-            console.log("dataReady (showEnvironmentRequestsGraph):", dataReady);
-            
-            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Time", "Response Time [ms]", false, "environments_requests_legend");
+            showGraph(parsedData, dataReady, dataSeries, divContainerId, "Date", "Response Time [ms]", false, "response_times_graph_legends", 2);
         }
 
         function reminder() {
@@ -1423,12 +1399,8 @@
 
         function getSignByBoolean(isTrue) {
             if (isTrue) {
-                // return '<span style="color: green; font-size: 20px;">&#10003;</span>';
-                // return '<span style="font-size: 14px; color: green;">&#10003;</span>';
                 return '<span style="color: green;">&#10003;</span>';
             }
-            // return '<span style="color: red; font-size: 20px;">&#10060;</span>';
-            // return '<span style="font-size: 14px; color: red">&#10007;</span>';
             return '<span style="color: red">&#10007;</span>';
         }
             
@@ -1436,15 +1408,15 @@
             return getSignByBoolean(result === 'pass');
         }
 
-        function addDailyResultInformation(timeValueQueryParam, environmentQueryParam) {
+        function addDailyResultInformation(timeQueryParam, environmentQueryParam) {
 
             const header = document.createElement('h2');                             
-            header.innerText = `Test summary`;
+            header.innerText = `Test Collection Summary`;
             document.getElementById('daily_result_information').appendChild(header);
 
-            if (timeValueQueryParam && environmentQueryParam) {
+            if (timeQueryParam && environmentQueryParam) {
                 const content = document.createElement('p');
-                content.innerHTML = `Test execution time: <b>${timeValueQueryParam}</b>`;
+                content.innerHTML = `Test execution time: <b>${timeQueryParam}</b>`;
                 document.getElementById('daily_result_information').appendChild(content);
             }
             if (environmentQueryParam) {
@@ -1453,8 +1425,6 @@
                 document.getElementById('daily_result_information').appendChild(content);
             }
 
-            // const horizontalLine = document.createElement('hr');
-            // document.getElementById('daily_result_information').appendChild(horizontalLine);
         }
 
         function showDailyResults(data) {
@@ -1471,16 +1441,16 @@
             let totalTestAmount = result.testResults.length;
 
             const header = document.createElement('h2');
-            header.innerText = "Test request"; 
+            header.innerText = "Test Request"; 
             document.getElementById('daily_summary').appendChild(header); 
 
             const content = document.createElement('p');
 
             content.innerHTML = `<span id="request_result_sign_${resultIndexQueryParam}" class="request_result_sign"></span> <span id="request_result_${resultIndexQueryParam}"></span> <span id="request_result_numbers_${resultIndexQueryParam}"></span> ${result.request.method} ${result.request.url}`;
-            // content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${getDateTimeByEnvironment(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
+            // content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${getDateTimeByEnvironment(timeQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
             document.getElementById('daily_summary').appendChild(content); 
 
-            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerHTML = `Test execution time: <b>${timeValueQueryParam}</b>`;
+            document.getElementById('daily_summary').appendChild(document.createElement('p')).innerHTML = `Test execution time: <b>${timeQueryParam}</b>`;
             document.getElementById('daily_summary').appendChild(document.createElement('p')).innerHTML = `Runtime: <b>${Math.round(result.runtime * 1000)} ms</b>`;
             document.getElementById('daily_summary').appendChild(document.createElement('p')).innerHTML = `Response time: <b>${result.response.responseTime} ms</b>`;
 
@@ -1543,42 +1513,6 @@
             document.getElementById('daily_summary').appendChild(assertionResultDiv);     
             testResultDiv.appendChild(testResultTable);
             document.getElementById('daily_summary').appendChild(testResultDiv);
-
-            /*
-            const responseDiv = document.createElement('div');
-            responseDiv.innerHTML = `
-                Response: <br>
-                status: ${result.response.status}<br>
-                statusText: ${result.response.statusText}<br>
-                headers, date${result.response.headers.date}<br>
-                headers, content-length: ${result.response.headers["content-length"]}<br>
-                headers, connection: ${result.response.headers["connection"]}<br>
-                headers, set-cookie: ${result.response.headers["set-cookie"]}<br>
-                headers, server: ${result.response.headers["server"]}<br>
-                headers, x-amz-apigw-id: ${result.response.headers["x-amz-apigw-id"]}<br>
-                data: ${result.response.data}<br>
-                responseTime: ${result.response.responseTime}<br>
-            `;
-            document.getElementById('daily_summary').appendChild(responseDiv);
-            */
-
-            /*
-            const responseDiv = document.createElement('div');
-            const responseTableDiv = document.createElement('table');
-
-            for (const [key, value] of Object.entries(result.response.headers)) {
-                responseTableDiv.innerHTML += `
-                    <tr>
-                        <td>${key}</td>
-                        <td>${value}</td>
-                    </tr>
-                `;
-            }
-
-            responseDiv.appendChild(responseTableDiv);
-            document.getElementById('daily_summary').appendChild(responseDiv);  
-            
-            */
  
             function createIndentedList(data) {
                 if (typeof data !== 'object' || data === null) {
@@ -1665,7 +1599,7 @@
 
             // document.getElementById('result_type').innerText = "Daily summary";
 
-            addDailyResultInformation(timeValueQueryParam, environmentQueryParam);
+            addDailyResultInformation(timeQueryParam, environmentQueryParam);
 
             let dataEntryIndex = 0;
 
@@ -1683,7 +1617,7 @@
                 document.getElementById('daily_summary').appendChild(contentDiv);
 
                 const content = document.createElement('h2');                             
-                content.innerText = `Test requests`;
+                content.innerText = `Test Collection Requests`;
                 document.getElementById('daily_summary').appendChild(content);
 
                 for (let resultIndex = 0; resultIndex < dataEntry.results.length; resultIndex++) {
@@ -1698,8 +1632,8 @@
                     const content = document.createElement('p');                             
 
 
-                    content.innerHTML = `<span id="request_result_sign_${resultIndex}" class="request_result_sign"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${encodeURIComponent(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
-                    // content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${getDateTimeByEnvironment(timeValueQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
+                    content.innerHTML = `<span id="request_result_sign_${resultIndex}" class="request_result_sign"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${encodeURIComponent(timeQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
+                    // content.innerHTML = `<span id="request_result_sign_${resultIndex}"></span> <span id="request_result_${resultIndex}"></span> <span id="request_result_numbers_${resultIndex}"></span> <a href="?environment=${environmentQueryParam}&time=${getDateTimeByEnvironment(timeQueryParam)}&dataEntryIndex=${dataEntryIndex}&resultIndex=${resultIndex}">${result.request.method} ${result.request.url}</a>`;
                     document.getElementById('daily_summary').appendChild(content); 
 
 
