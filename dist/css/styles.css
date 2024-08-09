@@ -1,21 +1,89 @@
+/* TS 7.8.2024: CHECKED */
 * {
     font-family: Tahoma, Arial, sans-serif;
 }
+
+/* TS 7.8.2024: CHECKED */
 body {
     margin: 10px 20px;
     /* margin: 0; */
 }
-#container {
+circle:hover {
+    cursor: pointer;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: Tahoma, Arial, sans-serif;
+    color: #0064AF;
+}
+li {
+    margin: 5px 0;
+}
+svg {
+    position: absolute; /* Voi joutua muuttamaan relative arvoksi, jos kuvaajia on useampia kuin yksi.*/
+    /* position: relative; */
+    top: 0;
+    left: 0;
+    width: 100%; /* SVG leveydeksi 100% #my_dataviz elementistä */
+    height: 100%; /* SVG korkeus 100% #my_dataviz elementistä */
+    /* border: 1px solid #0064AF; */
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    /* border: 1px solid black; */
+    /* padding: 8px; */
+    text-align: left;
+    vertical-align: top;
+}
+th {
+    background-color: #f2f2f2;
+}
+ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+
+
+/* ID */
+
+/* TS 7.8.2024: CHECKED */
+#passed_tests_graph_dataviz_and_legend {
     display: flex;
     padding: 0;
 }
-#environments_graph_legend1 {
+
+/* TS 7.8.2024: CHECKED */
+#passed_tests_graph_legends {
     width: 200px;
     height: calc(100vh - 80px);
     margin: 0;
     border: 0;
 }
-#my_dataviz, #environments_dataviz, #environment_requests_dataviz {
+
+/* TS 7.8.2024: CHECKED */
+#passed_tests_graph_dataviz {
+    position: relative;
+    width: calc(100% - 200px);
+    height: calc(100vh - 80px);
+    border: 1px solid #0064AF;
+    margin: 0;
+}
+
+/* TS 7.8.2024: CHECKED */
+.response_times_graph_legends {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 0 0 5px 0;
+    height: auto;
+}
+
+/* TS 7.8.2024: CHECKED */
+#my_dataviz, #response_times_graph_dataviz {
     position: relative; 
     /* width: 100vw; */ /* 100% ikkunan leveydestä */
     width: 100%; /* Olisiko parempi ? */
@@ -29,46 +97,9 @@ body {
     border: 1px solid #0064AF;
     margin: 0 0 100px 0;
 }
-svg {
-    position: absolute; /* Voi joutua muuttamaan relative arvoksi, jos kuvaajia on useampia kuin yksi.*/
-    /* position: relative; */
-    top: 0;
-    left: 0;
-    width: 100%; /* SVG leveydeksi 100% #my_dataviz elementistä */
-    height: 100%; /* SVG korkeus 100% #my_dataviz elementistä */
-    /* border: 1px solid #0064AF; */
-}
-.request_result_sign {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    margin-right: 5px;
-    vertical-align: top;
-    font-weight: bold;
-}
-.tick text {
-    font-size: 14px; /* Muuta tämä halutun kokoiseksi */
-}
-.tooltip, .environments_tooltip, .environment_requests_tooltip {
-    font-family: Tahoma, Arial, sans-serif;
-    color: #0064AF;
-    position: absolute;
-    top: 0;
-    left: 0;
-    border: 1px solid black;
-    padding: 5px;
-    background-color: white;
-    pointer-events: none; /* This ensures the tooltip doesn't block mouse events */
-    display: none; /* Initially hide the tooltip */
 
-}
-circle:hover {
-    cursor: pointer;
-}
-h1, h2, h3, h4, h5, h6 {
-    font-family: Tahoma, Arial, sans-serif;
-    color: #0064AF;
-}
+/* CLASS */
+
 .active {
     display: block;
 }
@@ -100,23 +131,46 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: bold;
 }
 
-table {
+/* TS 7.8.2024: CHECKED */
+.passed_tests_graph_legends {
+    display: inline-block;
+    width: 20%;
+    padding: 10px;
+    /* border: 1px solid #000; */
+    margin: 5px;
+    box-sizing: border-box;
+}
+
+/* TS 7.8.2024: CHECKED */
+.response_times_graph_legends {
+    display: block;
     width: 100%;
-    border-collapse: collapse;
+    padding: 10px;
+    /* border: 1px solid #000; */
+    margin: 5px;
+    box-sizing: border-box;
 }
-th, td {
-    /* border: 1px solid black; */
-    /* padding: 8px; */
-    text-align: left;
+
+.request_result_sign {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
     vertical-align: top;
+    font-weight: bold;
 }
-th {
-    background-color: #f2f2f2;
+.tick text {
+    font-size: 14px; /* Muuta tämä halutun kokoiseksi */
 }
-ul {
-    list-style-type: none;
-    padding-left: 20px;
-}
-li {
-    margin: 5px 0;
+.tooltip, .environments_tooltip, .environment_requests_tooltip {
+    font-family: Tahoma, Arial, sans-serif;
+    color: #0064AF;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 1px solid black;
+    padding: 5px;
+    background-color: white;
+    pointer-events: none; /* This ensures the tooltip doesn't block mouse events */
+    display: none; /* Initially hide the tooltip */
 }
