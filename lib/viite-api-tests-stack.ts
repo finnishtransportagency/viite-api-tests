@@ -235,7 +235,7 @@ export class ViiteApiTestsStack extends Stack {
               `aws s3 cp results-qa.json s3://${dataBucket.bucketName}/$TARGET/`,
               `aws s3 cp results-prod.json s3://${dataBucket.bucketName}/$TARGET/`,
               `aws s3 cp ./dist s3://${websiteBucket.bucketName}/ --recursive`,
-              `aws cloudfront create-invalidation --distribution-id E2ION4DK2QI6VQ --paths "/index.html" "/css/styles.css" "/css/vayla.css" `
+              `aws cloudfront create-invalidation --distribution-id E2ION4DK2QI6VQ --paths "/index.html" "/css/styles.css" "/css/vayla.css" "/images" `
             ],
           },
         },

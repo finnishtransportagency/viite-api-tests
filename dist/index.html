@@ -35,13 +35,11 @@
 
 <body>
 
-    <p><a href="./index.html"><img src="./src/vayla_sivussa_fi_sv_rgb.png" width="15%" height="15%"></a></p>
+    <p><a href="./index.html"><img src="./images/vayla_sivussa_fi_sv_rgb.png" width="15%" height="15%"></a></p>
     
     <h1>Viite</h1>
     
     <!-- <p><span id="front_page" class="content"><a href="./index.html">Front Page</a></span> <span id="back" class="content">| <a href="javascript:history.back()" id="back">Back</a></span></p> -->
-    
-    <h2 id="result_type"></h2> <!-- IS THIS NEEDED ? -->
 
     <div id="daily_result_information" class="content"></div>
 
@@ -51,6 +49,7 @@
         <!-- <h2 id="daily_summary_header">Daily Summary</h2> -->
     </div>
 
+    <!-- FIRST GRAPH -->
     <div id="passed_tests_graph_container" class="content">
         <h2>Passed API Tests Over Time in All Environments</h2>
         <div id="passed_tests_graph_dataviz_and_legend">
@@ -58,32 +57,31 @@
             <div id="passed_tests_graph_legends" class="passed_tests_graph_legends"></div>
         </div>
         <!-- <div id="environments_graph_legend" class="legend-container"></div> -->
-        <!-- <div id="environments_tooltip" class="tooltip"></div> -->
     </div>
 
+    <!-- SECOND GRAPH -->
     <div id="response_times_graph_container" class="content">
         <h2>Response Times for API Test Requests Over Time in the Production Environment</h2>
         <div id="response_times_graph_dataviz"></div>
         <div id="response_times_graph_legends" class="response_times_graph_legends"></div>
-        <!-- <div id="environment_requests_tooltip" class="tooltip"></div> -->
     </div>
 
-    <!-- TS 7.8.2024: Checked -->
+    <!-- TS 13.8.2024: Checked -->
     <div id="tooltip" class="tooltip"></div>
 
     
 
     <script>
 
-        // TS 7.8.2024: Checked
-        // Should this be inside main-function?
+        // TS 13.8.2024: Checked
         const urlParams = new URLSearchParams(window.location.search);
         const environmentQueryParam = urlParams.get('environment');
         const timeQueryParam = urlParams.get('time');
         const dataEntryIndexQueryParam = urlParams.get('dataEntryIndex');
         const resultIndexQueryParam = urlParams.get('resultIndex');
 
-        // TS 7.8.2024: Checked
+        // TS 13.8.2024: Checked
+        // SCRIPT STARTS HERE
         document.addEventListener('DOMContentLoaded', () => {
             main();
         });
@@ -93,12 +91,16 @@
         * main *
         ********
         *******/
-
+    
+        // SCRIPT CONTINUES HERE AFTER THE PAGE HAS LOADED
         async function main() {
 
+            // TS 13.8.2024: Checked
+            // CHECK AND CHANGE BASEURL FUNCTION WHEN USING ON LOCALHOST
             const baseURL = getBaseURL();
 
-            // TS 29.7.2024: Checked
+            // TS 13.8.2024: Checked
+            // LET*S HIDE THE CONTENTS
             document.getElementById('passed_tests_graph_container').classList.remove('active');
             document.getElementById('response_times_graph_container').classList.remove('active');
             document.getElementById('daily_result_information').classList.remove('active');
@@ -182,7 +184,7 @@
             }
             else {
                 
-                // TS 7.8.2024: Checked
+                // TS 13.8.2024: Checked
 
                 setElementVisibleByElementId("passed_tests_graph_container");
                 setElementVisibleByElementId("response_times_graph_container");
@@ -195,7 +197,7 @@
             }
         }
 
-        // TS 7.8.2024: Checked
+        // TS 13.8.2024: Checked
         function setElementVisibleByElementId(elementId) {
             const element = document.getElementById(elementId);
             if (element) {
@@ -213,12 +215,12 @@
             }
         }
 
-        // TS 7.8.2024: Checked
+        // TS 13.8.2024: Checked
         function isLocal() {
             return window.location.protocol === 'file:';
         }
 
-        // TS 7.8.2024: Checked
+        // TS 13.8.2024: Checked
         // Determine base URL based on environment
         function getBaseURL() {
             if ( isLocal() ) {
@@ -238,7 +240,7 @@
             return; 
         }
 
-        // TS 7.8.2024: Checked
+        // TS 13.8.2024: Checked
         async function fetchDataAndHandleErrors(url, divContainerId, callback) {
             try {
                 const data = await fetchData(url);
@@ -252,12 +254,11 @@
             }
         }
 
-        // TS 7.8.2024: Checked
+        // TS 13.8.2024: Checked
         function fetchData(url) {
-            return fetch(url) // TOIMII
+            return fetch(url) 
             .then(response => {
                 if (!response.ok) {
-                    console.log(response.status);
                     switch(response.status) {
                         case 403: 
                             gotoLoginPage();
@@ -339,10 +340,7 @@
 
         function showGraph(data, dataReady, dataSeries, divContainerId, xLabel, yLabel, createCircles, legendContainer, id) {
 
-            // document.getElementById('result_type').innerText = "Graph";
-
-            // set the dimensions and margins of the graph
-            // const margin = {top: 50, right: 250, bottom: 50, left: 70};
+            // Set the dimensions and margins of the graph
             const margin = {top: 50, right: 50, bottom: 50, left: 70};
             // let width = window.innerWidth - margin.left - margin.right - 40;
             let width = document.getElementById(divContainerId).clientWidth - margin.left - margin.right;
@@ -359,8 +357,6 @@
                 // .wheelDelta(function(event) { return -event.deltaY * 0.01; }) 
                 .filter( event => {
                     return event.ctrlKey; // Zoom only when Ctrl key is pressed
-                    // return event.ctrlKey && event.button === 0;
-                    // return (event.ctrlKey || event.type === 'wheel') || (event.ctrlKey && event.button === 1);
                 })
                 .on("zoom", event => {
                     if (isMouseOverSvg && event.sourceEvent) {
@@ -368,7 +364,7 @@
                     }
                 });
             
-            // append the svg object to the body of the page
+            // Append the svg object to the container
             const svg = d3.select(`#${divContainerId}`)
                 .append("svg")
                     .attr("width", width + margin.left + margin.right)
@@ -392,122 +388,26 @@
                 .attr('transform', `translate(0,0)`)
                 .call(zoom);
 
-
             const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
             const formatDate = d3.utcFormat("%Y-%m-%dT%H:%M:%S%Z");
-
-            /*
-            data.forEach( (d) => {
-                d.date = parseDate(d.date);
-            });
-            */
-
-            /*
-            const parsedData1 = [];
-            for (let key in data) {
-                // const parsedDate = parseDate(key.replace(/\//g, ""));
-                const parsedDate = key.replace(/\//g, "");
-                parsedData1.push({
-                    date: parsedDate,
-                    dev: data[key].dev,
-                    qa: data[key].qa,
-                    prod: data[key].prod
-                });
-            }
-            */
-
-            /*
-            const parsedData2 = [];
-            for (let key in data) {
-                if (data.hasOwnProperty(key)) {
-                    parsedData2.push({
-                        date: key.replace(/\//g, ""), // Säilytetään alkuperäinen päivämäärämerkkijono
-                        dev: data[key].dev,
-                        qa: data[key].qa,
-                        prod: data[key].prod
-                    });
-                }
-            }
-            */
-
-            // console.log("parsedData2:", parsedData2)
-            
-
-            // console.log(parsedData);
-            
-            // sorts parsedData by date and time in ascending order
-            /*
-            parsedData2.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateA - dateB;
-            });
-            */
-
-            // console.log("parsedData:", parsedData2);
-            
-            // let parsedData2 = parsedData;
-            
-            // console.log(parsedData);
-
-            // List of environments
-            // const allEnvironments = ["prod", "qa", "dev"];
-
-            // environmentName is stored two times in the data. Can this be fixed?
-            // Reformat the data
-            /*
-            const dataReady = allEnvironments.map(environmentName => {
-                return {
-                    name: environmentName,
-                    values: parsedData2.map(d => {
-                        return {date: d.date, value: +d[environmentName], environment: environmentName};
-                    })
-                };
-            });
-            */
-            
-            // Check that the data is ready
-            // console.log(dataReady);
 
             const myColor = d3.scaleOrdinal()
                 .domain(dataSeries)
                 .range(["#0064AF", "#0099FF", "#49C2F1", "#00B0CC", "#207A43", "#8DCB6D", "#FFC300", "#910AA3", "#C73F00", "#FF5100", "#E50083"]); // Customer's colors are being used
 
-            // Generate unique tick values for the initial state
-            // const initialTicks = data.map(d => new Date(d.date))
-                // .filter((d, i, self) => self.findIndex(t => t.getTime() === d.getTime()) === i);
-
-            // Add X axis --> it is a date format
+            // Add X axis
             const x = d3.scaleTime()
             // const x = d3.scaleUtc()
                 .domain(d3.extent(data, d => new Date(d.date)))
                 .range([ 0, width ]);
             
-            const temp = d3.extent(data, d => new Date(d.date)); 
+            d3.extent(data, d => new Date(d.date)); // IS THIS NEEDED ?
 
-            const xAxis = d3.axisBottom(x);
+            const xAxis = d3.axisBottom(x); // IS THIS NEEDED ?
 
             const gx = svg.append("g")
                 .attr("transform", `translate(0,${height})`)
-                // .call(xAxis);
                 .call(createXAxis(x));
-            
-            // gx.call(createXAxis(x));
-            
-
-
-            /*
-            const xAxis = svg.append("g")
-                .attr("transform", `translate(0, ${height})`)
-                .call(d3.axisBottom(x)
-                    .tickValues(initialTicks)
-                    .tickFormat(d3.timeFormat("%Y-%m-%d %H:%M:%S"))
-                    // .tickSize(0) // Ei viivoja
-                    .tickPadding(10) // Puskuri akseleiden ja tekstien välillä
-                );
-                // .call(d3.axisBottom(x));
-                // .call(d3.axisBottom(x).ticks(2));
-            */
 
             let xAxisLabel = svg.append("text")
                 .attr("transform", `translate(${width / 2},${height + margin.bottom - 10})`)
@@ -515,36 +415,17 @@
                 .text(xLabel);
                 // .text(Object.keys(dataReady[0].values[0])[0].toUpperCase());
 
-
-
             // Add Y axis
-            /*
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(data, d => Math.max(d.prod, d.qa, d.dev) )])
-                .nice()
-                .range([ height, 0 ]);
-            */
-
             const y = d3.scaleLinear()
                 .domain([0, d3.max(dataReady.flatMap(d => d.values), d => d.value)])
                 .nice()
                 .range([height, 0]);
 
-            const yAxis = d3.axisLeft(y);
+            const yAxis = d3.axisLeft(y); // IS THIS NEEDED ?
 
             const gy = svg.append("g")
                 // .call(yAxis);
                 .call(createYAxis(y));
-            
-            // gy.call(createYAxis(y));
-
-            /*
-            const yAxis = svg.append("g")
-                .call(d3.axisLeft(y)
-                    .tickFormat(d3.format("d"))
-                );
-                // .call(d3.axisLeft(y).ticks(20));
-            */
 
             let yAxisLabel =  svg.append("text")
                 .attr("transform", `rotate(-90)`)
@@ -554,8 +435,6 @@
                 .text(yLabel);
                 // .text(Object.keys(dataReady[0].values[0])[1].toUpperCase());
 
-
-            // Add the lines
             const line = d3.line()
                 .x(d => x(new Date(d.date)))
                 .y(d => y(d.value));
@@ -663,50 +542,11 @@
                 tooltip.style.display = "block";
                 tooltip.style.left = event.pageX + 15 + "px";
                 tooltip.style.top = event.pageY + 15 +"px";
-                // tooltip.textContent = "Tooltip: You are over the circle.";
-                // tooltip.textContent = `environment: ${d.environment} passed tests: ${d.value} date: ${d.date}`;
                 tooltip.innerHTML = `
                     name: ${d.name}<br>
                     value: ${d.value}<br>
                     date: ${d.date}
                 `;
-                console.log(d);
-            }
-
-            function showTooltip3(event, d) {
-                const tooltip = document.getElementById("tooltip");
-                tooltip.style.display = "block";
-                tooltip.style.left = event.pageX + 15 + "px";
-                tooltip.style.top = event.pageY + 15 +"px";
-                // tooltip.textContent = "Tooltip: You are over the circle.";
-                // tooltip.textContent = `environment: ${d.environment} passed tests: ${d.value} date: ${d.date}`;
-                tooltip.innerHTML = `
-                    environment: ${d.environment}<br>
-                    passed tests: ${d.value}<br>
-                    date: ${d.date}
-                `;
-            }
-
-            function showTooltip4(event, d) {
-                const tooltip = d3.select("#tooltip");
-
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-
-                tooltip
-                    .style("display", "block")
-                    .style("left", (event.pageX + 15) + "px")
-                    .style("top", (event.pageY + 15) + "px")
-                    .html(`
-                        environment: ${d.environment}<br>
-                        passed tests: ${d.value}<br>
-                        date: ${d.date}
-                    `);
-
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", .9);
             }
 
             function hideTooltip() {
@@ -714,156 +554,51 @@
                 tooltip.style.display = "none";
             }
 
-
-
-            /******************
-            * Other functions *
-            ******************/
+            /***************************
+            * Functions to create axis *
+            ****************************/
 
             function createXAxis(scale) {
-                const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Mahdolliset päiväintervallit
-                let tickInterval = tickIntervals[0]; // Alkuarvo
-
-                // Etsitään sopiva päiväintervalli
-                for (let i = 0; i < tickIntervals.length; i++) {
-                    const interval = tickIntervals[i];
-                    const ticks = generateTickValues(scale.domain()[0], scale.domain()[1], interval);
-                    const avgTickDistance = width / ticks.length;
-                    const minDistance = 100; // Pienin pikselietäisyys tikkejen välillä
-
-                    if (avgTickDistance >= minDistance) {
-                        tickInterval = interval;
-                        break;
-                    }
-                }
-
-                // Luo manuaalisesti tasaväliset tick-arvot
-                const tickValues = generateTickValues(scale.domain()[0], scale.domain()[1], tickInterval);
-
-                return d3.axisBottom(scale)
-                    .tickValues(tickValues)
-                    .tickFormat(d3.timeFormat("%Y-%m-%d"));
-            }
-
-            // Funktio tikkiarvojen generoimiseksi manuaalisesti
-            function generateTickValues(startDate, endDate, interval) {
-                const tickValues = [];
-                let currentDate = new Date(startDate);
-                currentDate.setHours(0, 0, 0, 0); // Nollataan kellonaika
-
-                // Varmistetaan, että tikit alkavat `startDate`-päivämäärästä ja päättyvät `endDate`-päivämäärään
-                while (currentDate <= endDate) {
-                    if (currentDate >= startDate) {
-                        tickValues.push(new Date(currentDate));
-                    }
-                    currentDate.setDate(currentDate.getDate() + Math.round(interval)); // Pyöristetään interval oikeaksi
-                }
-
-                // Poista tikit, jotka ovat ennen x-akselin alkuarvoa
-                return tickValues.filter(date => date >= startDate);
-            }
-
-
-
-
-            /*
-            function createXAxis(scale) {
-                const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Mahdolliset päiväintervallit
-                let tickInterval = tickIntervals[0]; // Alkuarvo
-
-                // Etsitään sopiva päiväintervalli
-                for (let i = 0; i < tickIntervals.length; i++) {
-                    const interval = tickIntervals[i];
-                    const ticks = generateTickValues(scale.domain()[0], scale.domain()[1], interval);
-                    const avgTickDistance = width / ticks.length;
-                    const minDistance = 100; // Pienin pikselietäisyys tikkejen välillä
-
-                    if (avgTickDistance >= minDistance) {
-                        tickInterval = interval;
-                        break;
-                    }
-                }
-
-                // Luo manuaalisesti tasaväliset tick-arvot
-                const tickValues = generateTickValues(scale.domain()[0], scale.domain()[1], tickInterval);
-
-                return d3.axisBottom(scale)
-                    .tickValues(tickValues)
-                    .tickFormat(d3.timeFormat("%Y-%m-%d"));
-            }
-
-            // Funktio tikkiarvojen generoimiseksi manuaalisesti
-            function generateTickValues(startDate, endDate, interval) {
-                const tickValues = [];
-                let currentDate = new Date(startDate);
-                currentDate.setHours(0, 0, 0, 0); // Nollataan kellonaika
-
-                // Varmistetaan, että tikit alkavat `startDate`-päivämäärästä ja päättyvät `endDate`-päivämäärään
-                while (currentDate <= endDate) {
-                    if (currentDate >= startDate) {
-                        tickValues.push(new Date(currentDate));
-                    }
-                    currentDate.setDate(currentDate.getDate() + Math.round(interval)); // Pyöristetään interval oikeaksi
-                }
-
-                // Poista tikit, jotka ovat ennen x-akselin alkuarvoa
-                return tickValues.filter(date => date >= startDate);
-            }
-            */
-            
-
-
-            function createXAxis2(scale) {       
-
                 const tickIntervals = [0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]; // Possible day intervals
-                let minDistance = 70; // Minimum pixel distance between ticks
+                let tickInterval = tickIntervals[0]; // Initial value
 
-                let tickInterval = tickIntervals[0];
-                for (let i = 1; i < tickIntervals.length; i++) {
+                // Let's find suitable interval
+                for (let i = 0; i < tickIntervals.length; i++) {
                     const interval = tickIntervals[i];
-                    const ticks = scale.ticks(d3.timeDay.every(interval))
-                    minDistance = ticks.length + 70;
+                    const ticks = generateTickValues(scale.domain()[0], scale.domain()[1], interval);
                     const avgTickDistance = width / ticks.length;
+                    const minDistance = 70; // Lowest distance between ticks
+
                     if (avgTickDistance >= minDistance) {
                         tickInterval = interval;
                         break;
                     }
                 }
 
-                // xAxis.call(d3.axisBottom(x).ticks(d3.timeDay.every(tickInterval)));
-
-                /*
-                return d3.axisBottom(scale)
-                    .ticks(d3.timeDay.every(tickInterval))
-                    // .tickValues(tickValues)
-                    .tickFormat(d3.timeFormat("%Y-%m-%d"));
-                */
+                // Let's create manually tick values with even spaces
+                const tickValues = generateTickValues(scale.domain()[0], scale.domain()[1], tickInterval);
 
                 return d3.axisBottom(scale)
                     .tickValues(tickValues)
                     .tickFormat(d3.timeFormat("%Y-%m-%d"));
+            }
 
-
-
-                /*
-                const minTickSpacing = 80;
-                const domain = scale.domain();
-                const step = (domain[1] - domain[0]) / Math.max(1, Math.floor(width / minTickSpacing));
+            // Function to create tick values manually
+            function generateTickValues(startDate, endDate, interval) {
                 const tickValues = [];
+                let currentDate = new Date(startDate);
+                currentDate.setHours(0, 0, 0, 0); // Time is being reset
 
-                let current = domain[0];
-                while (current <= domain[1]) {
-                    tickValues.push(current);
-                    current = new Date(current.getTime() + step);
+                // Let's make sure that ticks will start from 'startDate and end until 'endDate
+                while (currentDate <= endDate) {
+                    if (currentDate >= startDate) {
+                        tickValues.push(new Date(currentDate));
+                    }
+                    currentDate.setDate(currentDate.getDate() + Math.round(interval)); // Pyöristetään interval oikeaksi
                 }
 
-                // Poista viimeinen tick
-                tickValues.pop();
-
-                return d3.axisBottom(scale)
-                    .tickValues(tickValues)
-                    .tickFormat(d3.timeFormat("%Y-%m-%d"));
-                */
+                // Ticks before y-axis will be removed
+                return tickValues.filter(date => date >= startDate);
             }
 
             function createYAxis(scale) {
@@ -873,6 +608,10 @@
                     .ticks(tickCount)
                     .tickFormat(d3.format("d"));
             }
+           
+            /******************
+            * Other functions *
+            ******************/
 
             function isPathHiddenByDataEnv(dataEnv) {
                 const paths = svg.selectAll(`path[data-env="${dataEnv}"]`);
@@ -897,7 +636,6 @@
             }
 
             function setCircleVisibilityByDataEnv(dataEnv, visibility) {
-                // const circle = d3.select(`#${id}`);
                 const circles = svg.selectAll(`circle[data-env="${dataEnv}"]`);
                 circles.classed("hidden", visibility);
             }
@@ -912,9 +650,7 @@
             }
 
             function togglePathVisibilityByDataEnv(dataEnv) {
-                // const path = d3.select(`#${id}`);
                 const paths = svg.selectAll(`path[data-env="${dataEnv}"]`);
-                // console.log(path);
                 let isHidden = paths.classed("hidden");
                 paths.classed("hidden", !isHidden)
                 isHidden = paths.classed("hidden");
@@ -922,8 +658,6 @@
             }
 
             function togglePathVisibilityByD(d) {
-                // console.log(d);
-                // console.log(`path_${d.name}`);
                 return togglePathVisibilityByDataEnv(d.name);
             }
 
@@ -947,9 +681,7 @@
                 d3.select(self).classed("dimmed", visibility);
             }
 
-            // Toggle visibility function
             function togglePathAndCircleVisibility(name) {
-                // Select paths and circles by name
                 const path = scatter.selectAll("path")
                     .filter(d => d.name === name);
                 
@@ -958,27 +690,10 @@
                         return d3.select(this.parentNode).datum().name === name;
                     });
 
-                // Toggle hidden class based on current state
                 const isHidden = path.classed("hidden");
                 path.classed("hidden", !isHidden);
                 circles.classed("hidden", !isHidden);
             }
-
-            // Add a legends
-            /*
-            const legend = svg.selectAll("myLegends")
-                .data(dataReady)
-                .enter()
-                .append("g")
-                    .attr("data-env", d => d.name)
-                    .attr("class", "legend")
-                    .attr("transform", (d, i) => `translate(${width + 20},${i * 20})`)
-                    .on("click", function(event, d) {
-                        toggleLegendAndPathAndCircleVisibilityByD(d, this); // OPTION 2
-                        // toggleLegendDimming(event, d, this); // OPTION 1
-                        // togglePathAndCircleVisibility(d.name); // OPTION 1
-                    });
-            */
             
             const environments_graph_legend = d3.select(`#${legendContainer}`);
 
@@ -1268,7 +983,7 @@
             
         }
 
-        // TS 7.8.2024: PARTIALLY CHECKED
+        // TS 13.8.2024: PARTIALLY CHECKED
         function showPassedTestsGraph(data, divContainerId) {
 
             // const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
@@ -1285,6 +1000,7 @@
                 }
             }
 
+            // SORT DATA BY DATE IN ASCENDING ORDER
             parsedData.sort((a, b) => {
                 const dateA = new Date(a.date);
                 const dateB = new Date(b.date);
@@ -1309,11 +1025,10 @@
             // const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
             const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%SZ");
 
-
-            // Suodattamalla vain "prod" ympäristö
+            // Only "prod" environment will be filtered
             const prodData = data.filter(d => d.env === "prod");
 
-            // Luo parsedData vain "prod" ympäristölle
+            // parsedData table will be created only for "prod" environment
             const parsedData = prodData.map(d => ({
                 date: d.timestamp,
                 value: d.responseTime,
@@ -1355,7 +1070,7 @@
                 "GET https://devapi.testivaylapilvi.fi/viite/api/viite/search/road_numbers?"
             ];
 
-            // Luo dataReady vain "prod" ympäristölle
+            // dataReady table will be created only for "prod" environment
             const dataReady = Array.from(
                 d3.group(parsedData, d => d.test),
                 ([key, values]) => ({ name: key, values: values})
@@ -1596,8 +1311,6 @@
         function showDailySummary(data) {
 
             // const formatDate = d3.utcFormat("%Y-%m-%dT%H-%M-%S%Z");
-
-            // document.getElementById('result_type').innerText = "Daily summary";
 
             addDailyResultInformation(timeQueryParam, environmentQueryParam);
 
