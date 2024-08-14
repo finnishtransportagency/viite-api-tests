@@ -1,9 +1,7 @@
-/* TS 7.8.2024: CHECKED */
 * {
     font-family: Tahoma, Arial, sans-serif;
 }
 
-/* TS 7.8.2024: CHECKED */
 body {
     margin: 10px 20px;
     /* margin: 0; */
@@ -19,12 +17,12 @@ li {
     margin: 5px 0;
 }
 svg {
-    position: absolute; /* Voi joutua muuttamaan relative arvoksi, jos kuvaajia on useampia kuin yksi.*/
+    position: absolute; 
     /* position: relative; */
     top: 0;
     left: 0;
-    width: 100%; /* SVG leveydeksi 100% #my_dataviz elementistä */
-    height: 100%; /* SVG korkeus 100% #my_dataviz elementistä */
+    width: 100%; 
+    height: 100%; 
     /* border: 1px solid #0064AF; */
 }
 table {
@@ -49,13 +47,11 @@ ul {
 
 /* ID */
 
-/* TS 7.8.2024: CHECKED */
 #passed_tests_graph_dataviz_and_legend {
     display: flex;
     padding: 0;
 }
 
-/* TS 7.8.2024: CHECKED */
 #passed_tests_graph_legends {
     width: 200px;
     height: calc(100vh - 80px);
@@ -63,7 +59,6 @@ ul {
     border: 0;
 }
 
-/* TS 7.8.2024: CHECKED */
 #passed_tests_graph_dataviz {
     position: relative;
     width: calc(100% - 200px);
@@ -72,7 +67,13 @@ ul {
     margin: 0;
 }
 
-/* TS 7.8.2024: CHECKED */
+.legend-color {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
 .response_times_graph_legends {
     display: block;
     width: 100%;
@@ -82,7 +83,6 @@ ul {
     height: auto;
 }
 
-/* TS 7.8.2024: CHECKED */
 #my_dataviz, #response_times_graph_dataviz {
     position: relative; 
     /* width: 100vw; */ /* 100% ikkunan leveydestä */
@@ -131,7 +131,6 @@ ul {
     font-weight: bold;
 }
 
-/* TS 7.8.2024: CHECKED */
 .passed_tests_graph_legends {
     display: inline-block;
     width: 20%;
@@ -141,7 +140,6 @@ ul {
     box-sizing: border-box;
 }
 
-/* TS 7.8.2024: CHECKED */
 .response_times_graph_legends {
     display: block;
     width: 100%;
@@ -159,9 +157,11 @@ ul {
     vertical-align: top;
     font-weight: bold;
 }
+
 .tick text {
-    font-size: 14px; /* Muuta tämä halutun kokoiseksi */
+    font-size: 14px; 
 }
+
 .tooltip, .environments_tooltip, .environment_requests_tooltip {
     font-family: Tahoma, Arial, sans-serif;
     color: #0064AF;
@@ -171,6 +171,6 @@ ul {
     border: 1px solid black;
     padding: 5px;
     background-color: white;
-    pointer-events: none; /* This ensures the tooltip doesn't block mouse events */
-    display: none; /* Initially hide the tooltip */
+    pointer-events: none; 
+    display: none; 
 }

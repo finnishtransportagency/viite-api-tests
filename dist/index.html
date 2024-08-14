@@ -8,29 +8,7 @@
     <!-- <script src="https://d3js.org/d3.v7.min.js"></script> -->
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="./css/vayla.css">
-    <style>
-            /* IS THIS NEEDED ? */
-            .chart-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .legend-container {
-                margin-top: 10px;
-            }
 
-            .legend-item {
-                display: inline-block;
-                margin-right: 10px;
-                cursor: pointer;
-            }
-            .legend-color {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                vertical-align: middle;
-            }
-    </style>
 </head>
 
 <body>
@@ -45,9 +23,7 @@
 
     <div id="daily_results" class="content"></div>
 
-    <div id="daily_summary" class="content">
-        <!-- <h2 id="daily_summary_header">Daily Summary</h2> -->
-    </div>
+    <div id="daily_summary" class="content"></div>
 
     <!-- FIRST GRAPH -->
     <div id="passed_tests_graph_container" class="content">
@@ -56,7 +32,6 @@
             <div id="passed_tests_graph_dataviz"></div>
             <div id="passed_tests_graph_legends" class="passed_tests_graph_legends"></div>
         </div>
-        <!-- <div id="environments_graph_legend" class="legend-container"></div> -->
     </div>
 
     <!-- SECOND GRAPH -->
@@ -66,21 +41,18 @@
         <div id="response_times_graph_legends" class="response_times_graph_legends"></div>
     </div>
 
-    <!-- TS 13.8.2024: Checked -->
     <div id="tooltip" class="tooltip"></div>
 
     
 
     <script>
 
-        // TS 13.8.2024: Checked
         const urlParams = new URLSearchParams(window.location.search);
         const environmentQueryParam = urlParams.get('environment');
         const timeQueryParam = urlParams.get('time');
         const dataEntryIndexQueryParam = urlParams.get('dataEntryIndex');
         const resultIndexQueryParam = urlParams.get('resultIndex');
 
-        // TS 13.8.2024: Checked
         // SCRIPT STARTS HERE
         document.addEventListener('DOMContentLoaded', () => {
             main();
@@ -95,11 +67,9 @@
         // SCRIPT CONTINUES HERE AFTER THE PAGE HAS LOADED
         async function main() {
 
-            // TS 13.8.2024: Checked
             // CHECK AND CHANGE BASEURL FUNCTION WHEN USING ON LOCALHOST
             const baseURL = getBaseURL();
 
-            // TS 13.8.2024: Checked
             // LET*S HIDE THE CONTENTS
             document.getElementById('passed_tests_graph_container').classList.remove('active');
             document.getElementById('response_times_graph_container').classList.remove('active');
@@ -112,25 +82,9 @@
                 setElementVisibleByElementId("daily_summary");
                 setTextVisibleByElementId("front_page");
                 setTextVisibleByElementId("back");
-                // document.getElementById('daily_result_information').classList.remove('content');
-                // document.getElementById('daily_result_information').classList.add('active');
-                // document.getElementById('daily_summary').classList.remove('content');
-                // document.getElementById('daily_summary').classList.add('active');
-                // fetchDataAndShowDailySummary();
 
-                // const url = `${baseURL}${timeQueryParam}/results-${environmentQueryParam}.json`;
                 const url = `${baseURL}${getDateTimeByEnvironment(timeQueryParam)}/results-${environmentQueryParam}.json`;
                 fetchDataAndHandleErrors(url, "my_dataviz", showDailyResults);
-
-                /*
-                try {
-                    const data = await fetchData(url);
-                    showDailySummary(data);
-                }
-                catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-                */
 
             }
             else if (timeQueryParam && environmentQueryParam && resultIndexQueryParam) {
@@ -138,23 +92,9 @@
                 setElementVisibleByElementId("daily_summary");
                 setTextVisibleByElementId("front_page");
                 setTextVisibleByElementId("back");
-                // document.getElementById('daily_result_information').classList.remove('content');
-                // document.getElementById('daily_result_information').classList.add('active');
-                // document.getElementById('daily_summary').classList.remove('content');
-                // document.getElementById('daily_summary').classList.add('active');
-                // fetchDataAndShowDailySummary();
+
                 const url = `${baseURL}${getDateTimeByEnvironment(timeQueryParam)}/results-${environmentQueryParam}.json`;
                 fetchDataAndHandleErrors(url, "my_dataviz", showDailyResults);
-
-                /*
-                try {
-                    const data = await fetchData(url);
-                    showDailySummary(data);
-                }
-                catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-                */
 
             }
             else if (timeQueryParam && environmentQueryParam) {
@@ -162,30 +102,14 @@
                 setElementVisibleByElementId("daily_summary");
                 setTextVisibleByElementId("front_page");
                 setTextVisibleByElementId("back");
-                // document.getElementById('daily_result_information').classList.remove('content');
-                // document.getElementById('daily_result_information').classList.add('active');
-                // document.getElementById('daily_summary').classList.remove('content');
-                // document.getElementById('daily_summary').classList.add('active');
-                // fetchDataAndShowDailySummary();
+
 
                 const url = `${baseURL}${getDateTimeByEnvironment(timeQueryParam)}/results-${environmentQueryParam}.json`;
                 fetchDataAndHandleErrors(url, "my_dataviz", showDailySummary);
 
-                /*
-                try {
-                    const data = await fetchData(url);
-                    showDailySummary(data);
-                }
-                catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-                */
-
             }
             else {
                 
-                // TS 13.8.2024: Checked
-
                 setElementVisibleByElementId("passed_tests_graph_container");
                 setElementVisibleByElementId("response_times_graph_container");
 
@@ -197,7 +121,6 @@
             }
         }
 
-        // TS 13.8.2024: Checked
         function setElementVisibleByElementId(elementId) {
             const element = document.getElementById(elementId);
             if (element) {
@@ -206,7 +129,6 @@
             }
         }
 
-        // TS 7.8.2024: Checked
         function setTextVisibleByElementId(elementId) {
             const element = document.getElementById(elementId);
             if (element) {
@@ -215,12 +137,10 @@
             }
         }
 
-        // TS 13.8.2024: Checked
         function isLocal() {
             return window.location.protocol === 'file:';
         }
 
-        // TS 13.8.2024: Checked
         // Determine base URL based on environment
         function getBaseURL() {
             if ( isLocal() ) {
@@ -230,7 +150,6 @@
             }
         }
 
-        // TS 7.8.2024: Checked
         function gotoLoginPage() {
             if ( isLocal() ) {
                 window.location.href = "https://viiteapitest.testivaylapilvi.fi/oauth2/"; // Never used. Can be tested when having "404 error".
@@ -240,7 +159,6 @@
             return; 
         }
 
-        // TS 13.8.2024: Checked
         async function fetchDataAndHandleErrors(url, divContainerId, callback) {
             try {
                 const data = await fetchData(url);
@@ -254,7 +172,6 @@
             }
         }
 
-        // TS 13.8.2024: Checked
         function fetchData(url) {
             return fetch(url) 
             .then(response => {
@@ -352,9 +269,6 @@
             // Define zoom behavior
             const zoom = d3.zoom()
                 .scaleExtent([1, 500]) // min and max zoom
-                // .translateExtent([[0, 0], [width, height]])
-                // .translateExtent([[0, 0], [width, height]])
-                // .wheelDelta(function(event) { return -event.deltaY * 0.01; }) 
                 .filter( event => {
                     return event.ctrlKey; // Zoom only when Ctrl key is pressed
                 })
@@ -476,11 +390,6 @@
             }
 
             function mouseclick(event, d) {
-                // formattedDate = formatDate(d.date);
-                // const timezone = formattedDate.slice(-6); // +00:00
-                // const isoString = `${formattedDate.slice(0,19)}%2B${timezone.slice(2, 4)}:${timezone.slice(4)}`;
-                // window.location.href = `?environment=${d.environment}&time=${encodeURIComponent(d.date)}`;
-                // window.location.href = `?environment=${d.environment}&time=${encodeURIComponent(d.date)}`;
                 window.location.href = `?environment=${d.name}&time=${encodeURIComponent(d.date)}`;
             }
 
@@ -594,7 +503,7 @@
                     if (currentDate >= startDate) {
                         tickValues.push(new Date(currentDate));
                     }
-                    currentDate.setDate(currentDate.getDate() + Math.round(interval)); // Pyöristetään interval oikeaksi
+                    currentDate.setDate(currentDate.getDate() + Math.round(interval)); 
                 }
 
                 // Ticks before y-axis will be removed
@@ -719,31 +628,6 @@
             });
 
 
-            /*
-            legend.append("rect")
-                .attr("x", 0)
-                .attr("width", 18)
-                .attr("height", 18)
-                .style("fill", d => myColor(d.name))
-                // .on("click", (event, d) => {
-                    // togglePathAndCircleVisibility(d.name);
-                // });
-
-            legend.append("text")
-                .attr("x", 24)
-                .attr("y", 9)
-                .attr("dy", ".35em")
-                .style("text-anchor", "start")
-                .text(d => d.name)
-                // .on("click", (event, d) => {
-                    // togglePathAndCircleVisibility(d.name);
-                // });
-            */
-
-
-
-
-
             /**************
             ***************
             * updateChart *
@@ -757,19 +641,6 @@
                 let newX = event.transform.rescaleX(x);
                 let newY = event.transform.rescaleY(y);
 
-                // Generate unique tick values based on the new scale's domain
-                // const newDomain = newX.domain();
-                // const uniqueTicks = data.map(d => new Date(d.date))
-                    // .filter(d => d >= newDomain[0] && d <= newDomain[1])
-                    // .filter((d, i, self) => self.findIndex(t => t.getTime() === d.getTime()) === i)
-
-                // update axes with these new boundaries
-                /*
-                xAxis.call(d3.axisBottom(newX)
-                    .tickValues(uniqueTicks)
-                    .tickFormat(d3.timeFormat("%Y-%m-%d %H:%M:%S"))
-                );
-                */
 
                 gx
                     .attr("transform", `translate(0,${height})`)
@@ -794,74 +665,6 @@
 
                 }
             }
-
-            /***********************
-            ************************
-            * updateLegendPosition *
-            ************************
-            ************************/
-
-            // Function to update legend position
-            /*
-            function updateLegendPosition() {
-                const legendSpacing = 20;
-                const legendWidth = 100;
-                const totalGroups = dataReady.length;
-                const svgWidth = width + margin.left + margin.right;
-                const legendX = svgWidth - legendWidth - 10; // Position legend on the right
-
-                const legend = svg.selectAll(".legend")
-                    .data(dataReady)
-                    .enter()
-                    .append("g")
-                    .attr("class", "legend")
-                    .classed("dimmed", d => isPathHiddenByDataEnv(d.name))
-                    .attr("transform", (d, i) => `translate(${width + 20},${i * 20})`)
-                    .on("click", function(event, d) {
-                        toggleLegendAndPathAndCircleVisibilityByD(d, this); // OPTION 2
-                        // toggleLegendDimming(event, d, this); // OPTION 1
-                        // togglePathAndCircleVisibility(d.name); // OPTION 1
-                    });
-                    // .attr("transform", (d, i) => `translate(${legendX},${i * legendSpacing})`);
-
-                legend.append("rect")
-                    .attr("x", 0)
-                    .attr("width", 18)
-                    .attr("height", 18)
-                    .style("fill", d => myColor(d.name));
-                    // .on("click", (event, d) => {
-                        // togglePathAndCircleVisibility(d.name);
-                    // });
-
-                legend.append("text")
-                    .attr("x", 24)
-                    .attr("y", 9)
-                    .attr("dy", ".35em")
-                    .style("text-anchor", "start")
-                    .text(d => d.name)
-                    // .on("click", (event, d) => {
-                        // togglePathAndCircleVisibility(d.name);
-                    // });
-
-                xAxisLabel.remove();
-                
-                xAxisLabel = svg.append("text")
-                    .attr("transform", `translate(${width / 2},${height + margin.bottom - 10})`)
-                    .style("text-anchor", "middle")
-                    .text(xLabel);
-                    // .text(Object.keys(dataReady[0].values[0])[0].toUpperCase());
-
-                yAxisLabel.remove();
-
-                yAxisLabel = svg.append("text")
-                    .attr("transform", `rotate(-90)`)
-                    .attr("y", 0 - margin.left + 20)
-                    .attr("x", 0 - (height / 2))
-                    .style("text-anchor", "middle")
-                    .text(yLabel);
-                    // .text(Object.keys(dataReady[0].values[0])[1].toUpperCase());
-            }
-            */
 
             function updateAxisLabelPosition() {
                 xAxisLabel.remove();
@@ -943,18 +746,6 @@
                     .attr("width", width)
                     .attr("height", height);
                 
-              
-
-
-                /*
-                xAxis.call(d3.axisBottom(x)
-                    .tickValues(initialTicks)
-                    .tickFormat(d3.timeFormat("%Y-%m-%d")))
-                    .attr('transform', `translate(0,${height})`);
-
-                yAxis.call(d3.axisLeft(y));
-                */
-
                 scatter.selectAll('path')
                     .attr('d', d => line(d.values));
 
@@ -966,24 +757,14 @@
                 
                 }
 
-                // Remove and update legend
-
-                // svg.selectAll(".legend").remove(); // Remove existing legends
-            
-                // Update legend position
-                // updateLegendPosition();
                 updateAxisLabelPosition();
 
             });
 
-            // Tarvitaanko?
-            // Initialize legend position
-            // updateLegendPosition();
             updateAxisLabelPosition();
             
         }
 
-        // TS 13.8.2024: PARTIALLY CHECKED
         function showPassedTestsGraph(data, divContainerId) {
 
             // const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
@@ -1035,24 +816,6 @@
                 test: d.test,
                 env: d.env
             }));
-
-            // const parsedData = [];
-            /*
-            const parsedData = data.map(d => ({
-                date: d.timestamp,
-                test: d.response_time, 
-            }));
-            */
-
-            // sorts parsedData by date and time in ascending order
-            /*
-            parsedData.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateA - dateB;
-            });
-            */
-
             
             const dataSeries = [
                 "GET https://devapi.testivaylapilvi.fi/viite/api/viite/changes/road_numbers?since={{since_var}}&until={{until_var}}", 
@@ -1075,33 +838,10 @@
                 d3.group(parsedData, d => d.test),
                 ([key, values]) => ({ name: key, values: values})
             );
-
-            /*
-            const dataReady = dataSeries.map(dataSerieName => {
-                return {
-                    name: dataSerieName,
-                    values: data.map(d => {
-                        return {date: d.timestamp, value: +d.response_time, dataSerie: dataSerieName};
-                    })
-                };
-            });
-            */
             
             showGraph(parsedData, dataReady, dataSeries, divContainerId, "Date", "Response Time [ms]", false, "response_times_graph_legends", 2);
         }
 
-        function reminder() {
-
-            const date1 = new Date("2023-10-01T10:00:00Z");
-            const date2 = new Date("2024-01-01T00:00:00+00:00");
-
-            console.log( date1.toString() );
-            console.log( date1.toISOString() );
-
-            console.log( date2.toString() );
-            console.log( date2.toISOString() );
-
-        }
 
         /********************
          ********************
@@ -1315,8 +1055,6 @@
             addDailyResultInformation(timeQueryParam, environmentQueryParam);
 
             let dataEntryIndex = 0;
-
-            // console.log(data)
 
             for (let dataIndex = 0; dataIndex < data.length; dataIndex++) {
                 dataEntry = data[dataIndex];
