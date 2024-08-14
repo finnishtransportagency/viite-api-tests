@@ -5,14 +5,14 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/changes/road_numbers?since=1989-01-01&until=2024-08-14
+  url: {{baseUrl}}/api/viite/changes/road_numbers?since=1989-01-01T00:00:00&until=2024-08-14T23:59:59
   body: none
   auth: none
 }
 
 params:query {
-  since: 1989-01-01
-  until: 2024-08-14
+  since: 1989-01-01T00:00:00
+  until: 2024-08-14T23:59:59
   ~since: {{since_var}}
   ~until: {{until_var}}
 }
