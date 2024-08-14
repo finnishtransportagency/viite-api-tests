@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/integration/linear_location/changes?since=1989-01-01T00:00:00
+  url: {{baseUrl}}/api/viite/integration/linear_location/changes?since=2000-01-01T00:00:00
   body: none
   auth: none
 }
 
 params:query {
-  since: 1989-01-01T00:00:00
+  since: 2000-01-01T00:00:00
   ~since: {{since_var}}
 }
 
