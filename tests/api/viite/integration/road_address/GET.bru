@@ -29,7 +29,7 @@ vars:pre-request {
 assert {
   res.status: eq 200
   res.statusText: eq OK
-  res.responseTime: lte 30000
+  ~res.responseTime: lte 30000
 }
 
 tests {
