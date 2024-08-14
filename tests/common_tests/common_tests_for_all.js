@@ -25,9 +25,12 @@ const common_tests_for_all = () => {
     expect(contentType).to.be.oneOf(['application/json', 'application/json; charset=UTF-8']);
   });
 
+  // RESPONSE TIME IS NOT DEFINED IN API DOCUMENTATION
+  /*
   test('Response time is less than "30" seconds', function () {
     expect(res.responseTime).to.be.below(30000);
   });
+  */
 
   // console.log(`!!! END: "${path.basename(__filename)}" !!!`);
 

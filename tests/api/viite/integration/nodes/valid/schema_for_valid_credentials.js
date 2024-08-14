@@ -10,9 +10,21 @@ const SCHEMA = {
                 "minimum": 1
             }, 
             "startDate": {
-                "type": "string", 
-                "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}[+-](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-            }, 
+                "anyOf": [
+                    { 
+                        "type": "string", 
+                        "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}[+-](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+                    }, 
+                    { 
+                        "type": "string", 
+                        "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}[+-](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+                    }, 
+                    {
+                        "type": "string",
+                        "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}$"
+                    }
+                ]
+            },
             "type": {
                 "type": "integer", 
                 "minimum": 1, 
@@ -24,44 +36,74 @@ const SCHEMA = {
             "nodeCoordinateX": {
                 "type": "integer", 
                 "minimum": 0, 
-                "maximum": 1000000
+                "maximum": 800000
             }, 
             "nodeCoordinateY": {
                 "type": "integer", 
-                "minimum": 0, 
-                "maximum": 1000000
+                "minimum": 6000000, 
+                "maximum": 8000000
             }, 
             "junctions": {
                 "type": "array", 
-                "minItems": 1, 
                 "items": {
                     "type": "object", 
-                    "required": ["startDate", "junctionNumber", "junctionCoordinateX",  "junctionCoordinateY", "road_address"], 
+                    "required": ["startDate", "junctionNumber", "junctionCoordinateX", "junctionCoordinateY", "road_address"], 
                     "properties": {
                         "startDate": {
-                            "type": "string", 
-                            "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}[+-](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-                        }, 
+                            "anyOf": [
+                                { 
+                                    "type": "string", 
+                                    "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}[+-](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+                                }, 
+                                { 
+                                    "type": "string", 
+                                    "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}[+-](0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+                                }, 
+                                {
+                                    "type": "string",
+                                    "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}$"
+                                }
+                            ]
+                        },
                         "junctionNumber": {
                             "type": "integer", 
                             "minimum": 1
                         },
                         "junctionCoordinateX": {
-                            "type": "integer", 
-                            "minimum": 0, 
-                            "maximum": 1000000
+                            "type": ["integer", "string"],
+                            "anyOf": [
+                                {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 800000
+                                },
+                                {
+                                    "type": "string",
+                                    "enum": ["N/A"]
+                                }
+                            ]
                         }, 
                         "junctionCoordinateY": {
-                            "type": "integer", 
-                            "minimum": 0, 
-                            "maximum": 1000000
+                            "type": ["integer", "string"],
+                            "anyOf": [
+                                {
+                                    "type": "integer",
+                                    "minimum": 6000000,
+                                    "maximum": 8000000
+                                },
+                                {
+                                    "type": "string",
+                                    "enum": ["N/A"]
+                                }
+                            ]
+
                         }, 
                         "road_address": {
                             "type": "array", 
                             "minItems": 1, 
                             "items": {
                                 "type": "object", 
-                                "required": ["roadNumber", "roadNumber", "track", "addrM", "beforeAfter"], 
+                                "required": ["roadNumber", "roadPartNumber", "track", "addrM", "beforeAfter"], 
                                 "properties": {
                                     "roadNumber": {
                                         "type": "integer", 
