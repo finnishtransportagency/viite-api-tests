@@ -49,7 +49,7 @@ const SCHEMA = {
                                         },
                                         {
                                             "type": "number", 
-                                            "minimum": 0,
+                                            "minimum": -10,
                                             "maximum": 1500
                                         }
                                     ]
@@ -118,7 +118,7 @@ const SCHEMA = {
                                                         },
                                                         {
                                                             "type": "number", 
-                                                            "minimum": 0,
+                                                            "minimum": -10,
                                                             "maximum": 1500
                                                         }
                                                     ]

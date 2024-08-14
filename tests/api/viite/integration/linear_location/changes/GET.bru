@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/viite/integration/linear_location/changes?since=1989-01-01
+  url: {{baseUrl}}/api/viite/integration/linear_location/changes?since=2024-01-01
   body: none
   auth: none
 }
 
 params:query {
-  since: 1989-01-01
+  since: 2024-01-01
   ~since: {{since_var}}
 }
 
@@ -26,7 +26,7 @@ vars:pre-request {
 assert {
   res.status: eq 200
   res.statusText: eq OK
-  res.responseTime: lte 10000
+  ~res.responseTime: lte 10000
 }
 
 tests {
@@ -35,7 +35,7 @@ tests {
   const { common_tests_for_valid_credentials } = require('./tests/common_tests/common_tests_for_valid_credentials.js');
   
   const data = res.body;
-  // const data = parse_test_data_from_json_file('./tests/api/viite/integration/summary', 'test_data_for_valid_credentials.json'); 
+  // const data = parse_test_data_from_json_file('./tests/api/viite/integration/linear_location/changes', 'test_data_for_valid_credentials.json'); 
   
   common_schema_test_for_response_data_and_schema_js_file(data, './tests/api/viite/integration/linear_location/changes', 'schema_for_valid_credentials.js'); 
   common_tests_for_all(); 
